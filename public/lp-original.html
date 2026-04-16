@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyPal — 定期テスト対策は、これ一本。</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --color-brand-green:   #58CC02;
+  --color-brand-blue:    #1CB0F6;
+  --color-brand-purple:  #9B5DE5;
+  --color-xp-gold:       #FFD900;
+  --color-streak:        #FF9600;
+  --color-error:         #FF4B4B;
+  --color-bg-primary:    #FFFFFF;
+  --color-bg-secondary:  #F7F7F8;
+  --color-bg-tertiary:   #EFEFEF;
+  --color-border:        #E5E5E5;
+  --color-text-primary:  #1A1A1A;
+  --color-text-secondary:#6B7280;
+  --color-text-muted:    #9CA3AF;
+  --font-display:'Nunito','M PLUS Rounded 1c',sans-serif;
+  --font-ui:'Inter','Noto Sans JP',system-ui,sans-serif;
+  --space-1:.25rem; --space-2:.5rem;  --space-3:.75rem;
+  --space-4:1rem;   --space-5:1.25rem;--space-6:1.5rem;
+  --space-8:2rem;   --space-10:2.5rem;--space-12:3rem;
+  --space-16:4rem;  --space-20:5rem;  --space-24:6rem;
+  --radius-sm:.375rem; --radius-md:.75rem; --radius-lg:1rem;
+  --radius-xl:1.5rem;  --radius-pill:9999px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.10),0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 30px rgba(0,0,0,.12),0 4px 8px rgba(0,0,0,.06);
+  --shadow-xl:0 20px 50px rgba(0,0,0,.18);
+  --shadow-brand-green:0 4px 20px rgba(88,204,2,.35);
+  --shadow-brand-blue:0 4px 20px rgba(28,176,246,.35);
+  --shadow-brand-purple:0 4px 20px rgba(155,93,229,.35);
+  --ease-bounce:cubic-bezier(.34,1.56,.64,1);
+  --ease-spring:cubic-bezier(.175,.885,.32,1.275);
+  --ease-out:cubic-bezier(0,0,.2,1);
+  --max-width:1280px;
+  --nav-height:68px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --color-bg-primary:#0F0F10;--color-bg-secondary:#1C1C1E;
+    --color-bg-tertiary:#2A2A2D;--color-border:#3A3A3D;
+    --color-text-primary:#F2F2F2;--color-text-secondary:#A0A0A8;
+    --color-text-muted:#6B6B75;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.4);
+    --shadow-md:0 4px 12px rgba(0,0,0,.5);
+    --shadow-lg:0 10px 30px rgba(0,0,0,.6);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+}
+
+/* ===== RESET ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font-ui);background:var(--color-bg-primary);color:var(--color-text-primary);line-height:1.6;-webkit-font-smoothing:antialiased;font-feature-settings:"palt" 1;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font-family:inherit}
+ul{list-style:none}
+img{display:block;max-width:100%}
+
+/* ===== KEYFRAMES ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(88,204,2,.4)}50%{box-shadow:0 0 0 8px rgba(88,204,2,0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(32px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-32px)}to{opacity:1;transform:translateX(0)}}
+@keyframes typingDot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+@keyframes progressFill{from{width:0}to{width:68%}}
+@keyframes rankSlide{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes streakPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes popIn{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+
+/* ===== NAV ===== */
+.nav{position:fixed;top:0;left:0;right:0;height:var(--nav-height);background:rgba(255,255,255,.9);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--color-border);z-index:1000;transition:box-shadow 200ms}
+@media(prefers-color-scheme:dark){.nav{background:rgba(15,15,16,.9)}}
+.nav-inner{max-width:var(--max-width);margin:0 auto;padding:0 var(--space-6);height:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--space-8)}
+.nav-logo{display:flex;align-items:center;gap:var(--space-2);font-family:var(--font-display);font-weight:800;font-size:1.375rem;color:var(--color-text-primary);white-space:nowrap}
+.nav-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#1CB0F6,#9B5DE5);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.nav-links{display:flex;align-items:center;gap:var(--space-1)}
+.nav-links a{font-size:.9375rem;font-weight:500;color:var(--color-text-secondary);padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);transition:color 150ms,background 150ms}
+.nav-links a:hover{color:var(--color-text-primary);background:var(--color-bg-secondary)}
+.nav-cta{display:flex;align-items:center;gap:var(--space-3)}
+.nav-login{font-size:.9375rem;font-weight:600;color:var(--color-text-secondary);padding:var(--space-2) var(--space-3);border-radius:var(--radius-pill);transition:color 150ms}
+.nav-login:hover{color:var(--color-brand-blue)}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;padding:var(--space-2);border-radius:var(--radius-md)}
+.nav-hamburger span{display:block;width:24px;height:2px;background:var(--color-text-primary);border-radius:2px;transition:transform 200ms,opacity 200ms}
+.nav-mobile-menu{display:none;position:fixed;top:var(--nav-height);left:0;right:0;background:var(--color-bg-primary);border-bottom:1px solid var(--color-border);padding:var(--space-4) var(--space-6);flex-direction:column;gap:var(--space-2);z-index:999}
+.nav-mobile-menu.open{display:flex}
+.nav-mobile-menu a{font-size:1rem;font-weight:600;color:var(--color-text-primary);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md)}
+.nav-mobile-menu a:hover{background:var(--color-bg-secondary)}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;gap:var(--space-2);padding:10px 22px;border-radius:var(--radius-pill);font-family:var(--font-ui);font-size:.9375rem;font-weight:700;transition:transform 120ms var(--ease-bounce),box-shadow 120ms ease;white-space:nowrap;cursor:pointer}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--color-brand-blue);color:#fff;box-shadow:var(--shadow-brand-blue)}
+.btn-primary:hover{box-shadow:0 6px 25px rgba(28,176,246,.45)}
+.btn-success{background:var(--color-brand-green);color:#fff;box-shadow:var(--shadow-brand-green)}
+.btn-success:hover{box-shadow:0 6px 25px rgba(88,204,2,.45)}
+.btn-ghost{background:transparent;color:var(--color-text-secondary);border:2px solid var(--color-border)}
+.btn-ghost:hover{color:var(--color-text-primary);border-color:var(--color-text-muted)}
+.btn-ghost-white{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.4)}
+.btn-ghost-white:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.7)}
+.btn-lg{padding:14px 32px;font-size:1.0625rem}
+
+/* ===== HERO ===== */
+.hero{min-height:100svh;padding-top:var(--nav-height);background:var(--color-bg-primary);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(28,176,246,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(28,176,246,.035) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.hero-orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(28,176,246,.12),transparent 70%);top:-100px;right:-80px}
+.hero-orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(155,93,229,.10),transparent 70%);bottom:0;left:-80px}
+.hero-orb-3{width:280px;height:280px;background:radial-gradient(circle,rgba(88,204,2,.08),transparent 70%);top:40%;right:32%}
+.hero-inner{max-width:var(--max-width);margin:0 auto;padding:var(--space-16) var(--space-6) var(--space-12);display:grid;grid-template-columns:1fr 1fr;gap:var(--space-12);align-items:center;flex:1;width:100%;position:relative;z-index:1}
+
+/* HERO COPY — FIX: staggered per-element animation, no "both" fill-mode on container */
+.hero-copy{position:relative;z-index:2}
+.hero-badge{display:inline-flex;align-items:center;gap:var(--space-2);background:linear-gradient(135deg,rgba(28,176,246,.12),rgba(155,93,229,.12));border:1px solid rgba(28,176,246,.25);border-radius:var(--radius-pill);padding:var(--space-2) var(--space-4);font-size:.8125rem;font-weight:700;color:var(--color-brand-blue);margin-bottom:var(--space-6);letter-spacing:.02em;opacity:0;animation:fadeUp .5s var(--ease-out) .05s forwards}
+.hero-badge-dot{width:6px;height:6px;background:var(--color-brand-green);border-radius:50%;animation:pulseGlow 2s infinite;flex-shrink:0}
+.hero-heading{font-family:var(--font-display);font-size:clamp(2.5rem,5vw,3.75rem);font-weight:900;line-height:1.1;color:var(--color-text-primary);margin-bottom:var(--space-6);letter-spacing:-.02em;opacity:0;animation:fadeUp .6s var(--ease-out) .15s forwards}
+.hero-heading-accent{background:linear-gradient(135deg,#1CB0F6 0%,#9B5DE5 50%,#58CC02 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite;display:inline-block}
+.hero-sub{font-size:1.125rem;color:var(--color-text-secondary);line-height:1.75;margin-bottom:var(--space-10);max-width:480px;opacity:0;animation:fadeUp .5s var(--ease-out) .3s forwards}
+.hero-ctas{display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;margin-bottom:var(--space-3);opacity:0;animation:fadeUp .5s var(--ease-out) .4s forwards}
+.hero-cta-note{font-size:.8125rem;color:var(--color-text-muted);margin-bottom:var(--space-10);opacity:0;animation:fadeIn .4s var(--ease-out) .5s forwards}
+.hero-stats{display:flex;gap:var(--space-8);padding-top:var(--space-8);border-top:1px solid var(--color-border);opacity:0;animation:fadeUp .5s var(--ease-out) .55s forwards}
+.hero-stat-number{font-family:var(--font-display);font-size:1.75rem;font-weight:800;color:var(--color-text-primary);line-height:1;margin-bottom:4px}
+.hero-stat-number span{color:var(--color-brand-green)}
+/* FIX: use secondary (not muted) so "継続率" etc are readable */
+.hero-stat-label{font-size:.8125rem;color:var(--color-text-secondary);font-weight:500}
+
+/* HERO VISUALS */
+.hero-visuals{position:relative;height:520px;z-index:1;opacity:0;animation:fadeIn .8s var(--ease-out) .2s forwards}
+
+/* MOCK base */
+.mock{background:var(--color-bg-primary);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-xl);overflow:hidden;font-family:var(--font-ui)}
+.mock-header{padding:10px 16px;background:var(--color-bg-secondary);border-bottom:1px solid var(--color-border);display:flex;align-items:center;gap:10px}
+.mock-dots{display:flex;gap:5px}
+.mock-dot{width:10px;height:10px;border-radius:50%}
+.mock-dot:nth-child(1){background:#FF5F57}.mock-dot:nth-child(2){background:#FEBC2E}.mock-dot:nth-child(3){background:#28C840}
+.mock-title{font-size:.75rem;font-weight:600;color:var(--color-text-secondary);flex:1;text-align:center}
+
+/* FIX: Separate wrapper (positioning) from mock-chat (float animation) — prevents transform conflict */
+.mock-chat-pos{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3}
+.mock-chat{width:320px;animation:float 5s ease-in-out infinite}
+.chat-messages{padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3);height:280px;overflow:hidden}
+.chat-bubble{max-width:82%;padding:10px 14px;border-radius:var(--radius-lg);font-size:.8125rem;line-height:1.5;animation:fadeUp .4s var(--ease-out) both}
+.chat-bubble.user{background:var(--color-brand-blue);color:#fff;border-bottom-right-radius:var(--radius-sm);align-self:flex-end}
+.chat-bubble.ai{background:var(--color-bg-secondary);color:var(--color-text-primary);border-bottom-left-radius:var(--radius-sm);align-self:flex-start}
+.chat-bubble.ai.d1{animation-delay:.4s}.chat-bubble.ai.d2{animation-delay:.8s}
+.chat-ai-header{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.chat-ai-avatar{width:20px;height:20px;background:linear-gradient(135deg,#1CB0F6,#9B5DE5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700;flex-shrink:0}
+.chat-ai-name{font-size:.6875rem;font-weight:700;color:var(--color-brand-blue)}
+.ai-badge{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(135deg,#9B5DE5,#1CB0F6);color:#fff;font-size:.625rem;font-weight:700;padding:1px 6px;border-radius:var(--radius-pill)}
+.chat-typing{display:flex;align-items:center;gap:4px;padding:10px 14px;background:var(--color-bg-secondary);border-radius:var(--radius-lg);border-bottom-left-radius:var(--radius-sm);align-self:flex-start;width:64px}
+.typing-dot{width:6px;height:6px;background:var(--color-text-muted);border-radius:50%;animation:typingDot 1.4s ease infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+.chat-input-row{padding:10px 14px;border-top:1px solid var(--color-border);display:flex;gap:8px}
+.chat-input-fake{flex:1;background:var(--color-bg-secondary);border:1px solid var(--color-border);border-radius:var(--radius-pill);padding:8px 14px;font-size:.75rem;color:var(--color-text-muted)}
+.chat-send-btn{width:32px;height:32px;background:var(--color-brand-blue);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-send-btn svg{width:14px;height:14px;fill:#fff}
+
+/* FIX: positions stay within container (no negative offsets that bleed over hero-copy) */
+.mock-ranking{position:absolute;width:218px;top:16px;right:0;z-index:4;animation:slideInRight .6s var(--ease-spring) .5s both}
+.ranking-list{padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.rank-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius-md);font-size:.75rem;animation:rankSlide .4s var(--ease-out) both}
+.rank-item:nth-child(1){animation-delay:.6s}.rank-item:nth-child(2){animation-delay:.75s}
+.rank-item:nth-child(3){animation-delay:.9s}.rank-item:nth-child(4){animation-delay:1.05s}
+.rank-item.rank-1{background:rgba(255,217,0,.1);border:1px solid rgba(255,217,0,.25)}
+.rank-item.rank-me{background:rgba(28,176,246,.1);border:1px solid rgba(28,176,246,.25)}
+.rank-medal{font-size:14px;width:18px;text-align:center}
+.rank-avatar{width:24px;height:24px;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-weight:700;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-xp{color:var(--color-text-muted);font-size:.6875rem}
+.rank-lv{background:var(--color-brand-purple);color:#fff;font-size:.6rem;font-weight:800;padding:1px 5px;border-radius:var(--radius-pill);white-space:nowrap}
+.rank-me-label{font-size:.625rem;font-weight:700;color:var(--color-brand-blue);background:rgba(28,176,246,.15);padding:1px 6px;border-radius:var(--radius-pill)}
+
+.mock-calendar{position:absolute;width:238px;bottom:16px;left:0;z-index:4;animation:slideInLeft .6s var(--ease-spring) .7s both}
+.calendar-body{padding:10px 14px}
+.cal-week-header{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px}
+.cal-day-name{font-size:.625rem;font-weight:700;color:var(--color-text-muted);text-align:center;padding:2px 0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px}
+.cal-day{aspect-ratio:1;border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.625rem;font-weight:600;color:var(--color-text-secondary);position:relative}
+.cal-day.today{background:var(--color-brand-blue);color:#fff;border-radius:var(--radius-md)}
+.cal-day.has-event::after{content:'';width:4px;height:4px;border-radius:50%;position:absolute;bottom:2px}
+.cal-day.ev-club::after{background:var(--color-brand-purple)}
+.cal-day.ev-test::after{background:var(--color-error)}
+.cal-day.ev-study::after{background:var(--color-brand-green)}
+.cal-events{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.cal-event{display:flex;align-items:center;gap:6px;font-size:.6875rem;color:var(--color-text-secondary)}
+.cal-event-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.cal-xp-track{height:8px;background:var(--color-bg-tertiary);border-radius:var(--radius-pill);overflow:hidden;margin-bottom:6px}
+.cal-xp-fill{height:100%;background:linear-gradient(90deg,#58CC02,#89E219);border-radius:var(--radius-pill);animation:progressFill 1.5s var(--ease-bounce) 1.2s both;width:0}
+.cal-xp-label{display:flex;justify-content:space-between;font-size:.6875rem;font-weight:600;margin-bottom:4px}
+.cal-xp-label span:last-child{color:var(--color-brand-green)}
+.streak-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,150,0,.1);border:1px solid rgba(255,150,0,.25);border-radius:var(--radius-pill);padding:3px 10px}
+.streak-icon{font-size:13px;animation:streakPulse 1.5s ease-in-out infinite}
+.streak-text{font-size:.6875rem;font-weight:700;color:var(--color-streak)}
+
+/* STATS BAR */
+.hero-stats-bar{background:var(--color-bg-secondary);border-top:1px solid var(--color-border);padding:var(--space-5) var(--space-6)}
+.hero-stats-bar-inner{max-width:var(--max-width);margin:0 auto;display:flex;align-items:center;justify-content:center;gap:var(--space-12);flex-wrap:wrap}
+.stat-item{display:flex;align-items:center;gap:var(--space-3)}
+.stat-icon{font-size:1.5rem}
+.stat-value{font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--color-text-primary);line-height:1}
+.stat-desc{font-size:.8125rem;color:var(--color-text-secondary);font-weight:500}
+.stat-divider{width:1px;height:40px;background:var(--color-border)}
+
+/* ===== COMMON SECTION ===== */
+.section{padding:var(--space-24) var(--space-6)}
+.section-inner{max-width:var(--max-width);margin:0 auto}
+.section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:.8125rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-brand-blue);margin-bottom:var(--space-4)}
+.section-heading{font-family:var(--font-display);font-size:clamp(1.75rem,3.5vw,2.75rem);font-weight:900;line-height:1.15;color:var(--color-text-primary);margin-bottom:var(--space-4);letter-spacing:-.02em}
+.section-sub{font-size:1.0625rem;color:var(--color-text-secondary);line-height:1.7;max-width:560px}
+.section-center{text-align:center}
+.section-center .section-sub{margin:0 auto}
+
+/* ===== PROBLEM ===== */
+.section-problem{background:#FFF9F5}
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin-top:var(--space-12)}
+.problem-who{margin-bottom:var(--space-3)}
+.problem-who-label{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;padding:4px 12px;border-radius:var(--radius-pill);margin-bottom:var(--space-5)}
+.problem-who-label.child{background:rgba(28,176,246,.1);color:var(--color-brand-blue)}
+.problem-who-label.parent{background:rgba(155,93,229,.1);color:var(--color-brand-purple)}
+.problem-card{background:#fff;border:1px solid #F0EBE3;border-radius:var(--radius-xl);padding:var(--space-6);box-shadow:var(--shadow-sm);transition:transform 200ms,box-shadow 200ms}
+.problem-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.problem-emoji{font-size:2rem;margin-bottom:var(--space-3)}
+.problem-title{font-family:var(--font-display);font-size:1.0625rem;font-weight:800;color:var(--color-text-primary);margin-bottom:var(--space-2)}
+.problem-desc{font-size:.9rem;color:var(--color-text-secondary);line-height:1.65}
+.problem-arrow{text-align:center;margin-top:var(--space-12);padding-top:var(--space-8);border-top:1px solid #F0EBE3}
+.problem-arrow-text{font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--color-text-primary)}
+.problem-arrow-sub{font-size:1rem;color:var(--color-text-secondary);margin-top:var(--space-2)}
+
+/* ===== FEATURES ===== */
+.section-features{background:#0A1628;color:#F2F2F2}
+.section-features .section-label{color:var(--color-brand-blue)}
+.section-features .section-heading{color:#F2F2F2}
+.section-features .section-sub{color:#A0A0A8}
+.feature-rows{margin-top:var(--space-16);display:flex;flex-direction:column;gap:var(--space-20)}
+.feature-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-12);align-items:center}
+.feature-row.rev{direction:rtl}
+.feature-row.rev>*{direction:ltr}
+.feature-num{font-family:var(--font-display);font-size:3.5rem;font-weight:900;line-height:1;color:rgba(28,176,246,.15);margin-bottom:var(--space-3);letter-spacing:-.03em}
+.feature-tag{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;padding:4px 12px;border-radius:var(--radius-pill);margin-bottom:var(--space-4);background:rgba(28,176,246,.15);color:var(--color-brand-blue)}
+.feature-title{font-family:var(--font-display);font-size:clamp(1.375rem,2.5vw,1.875rem);font-weight:900;color:#F2F2F2;margin-bottom:var(--space-5);line-height:1.25;letter-spacing:-.02em}
+.feature-desc{font-size:1rem;color:#A0A0A8;line-height:1.75;margin-bottom:var(--space-6)}
+.feature-points{display:flex;flex-direction:column;gap:var(--space-2)}
+.feature-point{display:flex;align-items:center;gap:var(--space-3);font-size:.9375rem;color:#D0D8E4;font-weight:500}
+.feature-point::before{content:'✓';width:20px;height:20px;background:rgba(88,204,2,.2);color:var(--color-brand-green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.625rem;font-weight:900;flex-shrink:0}
+
+/* Feature screen mockup (dark context) */
+.feat-screen{background:#162337;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-xl);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.feat-screen-bar{background:#0D1825;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 16px;display:flex;align-items:center;gap:8px}
+.feat-screen-bar-dots{display:flex;gap:5px}
+.feat-screen-bar-dots span{display:block;width:10px;height:10px;border-radius:50%}
+.feat-screen-bar-dots span:nth-child(1){background:rgba(255,95,87,.7)}
+.feat-screen-bar-dots span:nth-child(2){background:rgba(254,188,46,.7)}
+.feat-screen-bar-dots span:nth-child(3){background:rgba(40,200,64,.7)}
+.feat-screen-title{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.35);flex:1;text-align:center}
+.feat-screen-body{padding:var(--space-5)}
+
+/* Feature screen internals */
+.feat-chat-bubble{padding:10px 14px;border-radius:var(--radius-lg);font-size:.8125rem;line-height:1.5;margin-bottom:10px}
+.feat-chat-bubble.user{background:var(--color-brand-blue);color:#fff;border-bottom-right-radius:4px;margin-left:auto;max-width:80%}
+.feat-chat-bubble.ai-msg{background:rgba(255,255,255,.07);color:#D0D8E4;border-bottom-left-radius:4px;max-width:90%}
+.feat-chat-bubble .ai-head{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.feat-photo-preview{background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.15);border-radius:var(--radius-md);padding:var(--space-4);text-align:center;margin-bottom:10px}
+.feat-photo-icon{font-size:2rem;margin-bottom:4px}
+.feat-photo-text{font-size:.75rem;color:rgba(255,255,255,.4)}
+
+/* Calendar feature mock */
+.feat-cal-ai-card{background:rgba(28,176,246,.12);border:1px solid rgba(28,176,246,.25);border-radius:var(--radius-lg);padding:var(--space-4);margin-top:var(--space-4)}
+.feat-cal-ai-label{font-size:.6875rem;font-weight:700;color:var(--color-brand-blue);margin-bottom:var(--space-3);display:flex;align-items:center;gap:4px}
+.feat-cal-plan-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.8rem;color:#D0D8E4}
+.feat-cal-plan-row:last-child{border-bottom:none}
+.feat-cal-plan-day{font-weight:700;color:#A0C4E0;width:24px}
+.feat-cal-plan-subject{flex:1;margin-left:8px}
+.feat-cal-plan-time{font-size:.75rem;color:rgba(255,255,255,.4)}
+
+/* Game / ranking feature mock */
+.feat-quiz-q{font-size:.9rem;font-weight:700;color:#F2F2F2;margin-bottom:var(--space-4);line-height:1.4}
+.feat-quiz-timer{display:flex;align-items:center;gap:6px;margin-bottom:var(--space-4)}
+.feat-quiz-timer-bar{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:var(--radius-pill);overflow:hidden}
+.feat-quiz-timer-fill{height:100%;width:38%;background:linear-gradient(90deg,#FF4B4B,#FF9600);border-radius:var(--radius-pill)}
+.feat-quiz-timer-text{font-size:.75rem;font-weight:700;color:var(--color-streak);white-space:nowrap}
+.feat-quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.feat-quiz-opt{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-md);padding:10px 12px;font-size:.8125rem;color:#D0D8E4;font-weight:600;text-align:center;cursor:default}
+.feat-quiz-opt.correct{background:rgba(88,204,2,.2);border-color:rgba(88,204,2,.5);color:var(--color-brand-green)}
+.feat-mini-rank{margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px solid rgba(255,255,255,.08)}
+.feat-mini-rank-title{font-size:.6875rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-2)}
+.feat-mini-rank-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.75rem;color:#D0D8E4}
+.feat-mini-rank-num{width:16px;font-weight:700;color:rgba(255,255,255,.35)}
+.feat-mini-rank-name{flex:1;font-weight:600}
+.feat-mini-rank-xp{color:var(--color-xp-gold);font-weight:700}
+
+/* ===== SOCIAL PROOF ===== */
+.section-proof{background:#FFF0E8}
+.proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-6);margin-top:var(--space-12)}
+.proof-card{background:#fff;border-radius:var(--radius-xl);padding:var(--space-6);box-shadow:var(--shadow-md);transition:transform 200ms,box-shadow 200ms}
+.proof-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.proof-stars{color:var(--color-xp-gold);font-size:1rem;letter-spacing:2px;margin-bottom:var(--space-4)}
+.proof-text{font-size:.9375rem;color:var(--color-text-primary);line-height:1.7;margin-bottom:var(--space-5)}
+.proof-author{display:flex;align-items:center;gap:var(--space-3)}
+.proof-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:800;color:#fff;flex-shrink:0}
+.proof-name{font-weight:700;font-size:.9375rem;color:var(--color-text-primary)}
+.proof-role{font-size:.8125rem;color:var(--color-text-muted)}
+
+/* ===== PRICING ===== */
+.section-pricing{background:var(--color-bg-secondary)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-6);margin-top:var(--space-12);max-width:960px;margin-left:auto;margin-right:auto}
+.pricing-card{background:var(--color-bg-primary);border:2px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-8);position:relative;transition:transform 200ms,box-shadow 200ms}
+.pricing-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.pricing-card.featured{border-color:var(--color-brand-blue);box-shadow:var(--shadow-brand-blue);transform:scale(1.04)}
+.pricing-card.featured:hover{transform:scale(1.04) translateY(-4px);box-shadow:0 8px 30px rgba(28,176,246,.4)}
+.pricing-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1CB0F6,#9B5DE5);color:#fff;font-size:.8125rem;font-weight:700;padding:4px 16px;border-radius:var(--radius-pill);white-space:nowrap}
+.pricing-plan{font-size:.875rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);margin-bottom:var(--space-3)}
+.pricing-price{font-family:var(--font-display);font-size:2.75rem;font-weight:900;color:var(--color-text-primary);line-height:1;margin-bottom:4px}
+.pricing-price span{font-size:1rem;font-weight:600;color:var(--color-text-muted)}
+.pricing-period{font-size:.875rem;color:var(--color-text-muted);margin-bottom:var(--space-6)}
+.pricing-divider{height:1px;background:var(--color-border);margin-bottom:var(--space-6)}
+.pricing-features{display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-8)}
+.pricing-feature{display:flex;align-items:flex-start;gap:var(--space-3);font-size:.9375rem;color:var(--color-text-secondary)}
+.pricing-feature.on{color:var(--color-text-primary)}
+.pricing-feature::before{content:'✓';width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.625rem;font-weight:900;flex-shrink:0;margin-top:1px}
+.pricing-feature.on::before{background:rgba(88,204,2,.15);color:var(--color-brand-green)}
+.pricing-feature.off::before{content:'–';background:var(--color-bg-tertiary);color:var(--color-text-muted)}
+.pricing-cta{width:100%;text-align:center;display:block;padding:14px;border-radius:var(--radius-pill);font-weight:700;font-size:1rem;transition:transform 120ms var(--ease-bounce),box-shadow 120ms ease}
+.pricing-cta:hover{transform:translateY(-2px)}
+.pricing-cta.free{background:var(--color-bg-secondary);color:var(--color-text-primary);border:2px solid var(--color-border)}
+.pricing-cta.free:hover{border-color:var(--color-text-muted)}
+.pricing-cta.pro{background:var(--color-brand-blue);color:#fff;box-shadow:var(--shadow-brand-blue)}
+.pricing-cta.pro:hover{box-shadow:0 6px 25px rgba(28,176,246,.45)}
+.pricing-cta.fam{background:var(--color-brand-purple);color:#fff;box-shadow:var(--shadow-brand-purple)}
+.pricing-cta.fam:hover{box-shadow:0 6px 25px rgba(155,93,229,.45)}
+
+/* ===== FAQ ===== */
+.section-faq{background:#0A1628}
+.section-faq .section-label{color:var(--color-brand-blue)}
+.section-faq .section-heading{color:#F2F2F2}
+.faq-list{max-width:760px;margin:var(--space-12) auto 0;display:flex;flex-direction:column;gap:var(--space-3)}
+.faq-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius-xl);overflow:hidden;transition:border-color 200ms}
+.faq-item.open{border-color:rgba(28,176,246,.35)}
+.faq-question{display:flex;align-items:center;justify-content:space-between;padding:var(--space-5) var(--space-6);cursor:pointer;user-select:none;gap:var(--space-4)}
+.faq-question:hover{background:rgba(255,255,255,.03)}
+.faq-q-text{font-size:1rem;font-weight:700;color:#F2F2F2;line-height:1.5}
+.faq-icon{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 200ms,transform 200ms;font-size:1.125rem;color:rgba(255,255,255,.5);font-weight:300}
+.faq-item.open .faq-icon{background:rgba(28,176,246,.2);color:var(--color-brand-blue);transform:rotate(45deg)}
+.faq-answer{max-height:0;overflow:hidden;transition:max-height 350ms var(--ease-out)}
+.faq-item.open .faq-answer{max-height:300px}
+.faq-answer-inner{padding:0 var(--space-6) var(--space-5);font-size:.9375rem;color:#A0A0A8;line-height:1.75;border-top:1px solid rgba(255,255,255,.06)}
+
+/* ===== FINAL CTA ===== */
+.section-cta{background:linear-gradient(135deg,#0A1628 0%,#1a2d50 50%,#0d2040 100%);position:relative;overflow:hidden}
+.section-cta::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(28,176,246,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(28,176,246,.05) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.cta-inner{max-width:680px;margin:0 auto;text-align:center;position:relative;z-index:1}
+.cta-heading{font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:900;color:#fff;margin-bottom:var(--space-4);line-height:1.15;letter-spacing:-.02em}
+.cta-heading-accent{color:var(--color-xp-gold)}
+.cta-sub{font-size:1.0625rem;color:rgba(255,255,255,.65);margin-bottom:var(--space-10);line-height:1.6}
+.cta-form{display:flex;gap:var(--space-3);max-width:480px;margin:0 auto var(--space-4)}
+.cta-input{flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--radius-pill);padding:14px 22px;font-size:1rem;color:#fff;font-family:var(--font-ui);outline:none;transition:border-color 200ms,background 200ms}
+.cta-input::placeholder{color:rgba(255,255,255,.4)}
+.cta-input:focus{border-color:var(--color-brand-blue);background:rgba(255,255,255,.15)}
+.cta-note{font-size:.8125rem;color:rgba(255,255,255,.4)}
+.cta-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.cta-orb-1{width:400px;height:400px;background:radial-gradient(circle,rgba(28,176,246,.12),transparent 70%);top:-100px;right:-100px}
+.cta-orb-2{width:300px;height:300px;background:radial-gradient(circle,rgba(155,93,229,.10),transparent 70%);bottom:-50px;left:-80px}
+
+/* ===== FOOTER ===== */
+footer{background:#0A0A0B;padding:var(--space-16) var(--space-6) var(--space-10)}
+.footer-inner{max-width:var(--max-width);margin:0 auto}
+.footer-top{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-12);margin-bottom:var(--space-12);flex-wrap:wrap}
+.footer-brand{}
+.footer-logo{display:flex;align-items:center;gap:var(--space-2);font-family:var(--font-display);font-weight:800;font-size:1.25rem;color:#fff;margin-bottom:var(--space-3)}
+.footer-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#1CB0F6,#9B5DE5);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:16px}
+.footer-tagline{font-size:.9rem;color:rgba(255,255,255,.4);max-width:200px;line-height:1.6}
+.footer-links-wrap{display:flex;gap:var(--space-12);flex-wrap:wrap}
+.footer-links-group{}
+.footer-links-title{font-size:.8125rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.3);margin-bottom:var(--space-4)}
+.footer-links{display:flex;flex-direction:column;gap:var(--space-3)}
+.footer-links a{font-size:.9rem;color:rgba(255,255,255,.5);transition:color 150ms}
+.footer-links a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:var(--space-8);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4)}
+.footer-copy{font-size:.8125rem;color:rgba(255,255,255,.25)}
+.footer-badges{display:flex;gap:var(--space-3)}
+.footer-badge{font-size:.75rem;font-weight:600;padding:4px 12px;border-radius:var(--radius-pill);background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.08)}
+
+/* ===== SCROLL FADE ===== */
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s var(--ease-out),transform .6s var(--ease-out)}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+.fade-up.d1{transition-delay:.1s}.fade-up.d2{transition-delay:.2s}.fade-up.d3{transition-delay:.3s}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+  .hero-inner{grid-template-columns:1fr;gap:var(--space-10);padding-top:var(--space-10);text-align:center}
+  .hero-badge,.hero-sub,.hero-ctas,.hero-stats{margin-left:auto;margin-right:auto}
+  .hero-ctas,.hero-stats{justify-content:center}
+  .hero-visuals{height:420px;width:100%;max-width:480px;margin:0 auto}
+  .mock-chat{width:280px}
+  .mock-ranking{right:0;width:190px}
+  .mock-calendar{left:0;width:205px}
+  .feature-row,.feature-row.rev{grid-template-columns:1fr;direction:ltr}
+  .feature-row.rev .feature-copy{order:0}.feature-row.rev .feat-screen{order:1}
+  .proof-grid{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:1fr;max-width:400px}
+  .pricing-card.featured{transform:scale(1)}
+  .pricing-card.featured:hover{transform:translateY(-4px)}
+}
+@media(max-width:768px){
+  .nav-links,.nav-login{display:none}
+  .nav-hamburger{display:flex}
+  .nav-cta .btn-primary{display:none}
+  .hero-heading{font-size:2.25rem}
+  .hero-visuals{height:360px}
+  .mock-chat{width:240px}
+  .mock-ranking{width:166px}
+  .mock-calendar{width:182px}
+  .hero-stats-bar-inner{gap:var(--space-6)}
+  .stat-divider{display:none}
+  .section{padding:var(--space-16) var(--space-4)}
+  .problem-grid{grid-template-columns:1fr}
+  .cta-form{flex-direction:column}
+  .footer-top{flex-direction:column;gap:var(--space-8)}
+}
+@media(max-width:480px){
+  .hero-inner{padding:var(--space-8) var(--space-4)}
+  .hero-heading{font-size:2rem}
+  .hero-visuals{height:300px}
+  .mock-chat{width:200px}
+  .mock-ranking{display:none}
+  .mock-calendar{width:168px}
+  .hero-stats{gap:var(--space-5)}
+  .hero-stat-number{font-size:1.375rem}
+  .proof-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== NAV ========== -->
+<nav class="nav" role="navigation" aria-label="メインナビゲーション">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon" aria-hidden="true">📚</div>StudyPal
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="#features">機能</a></li>
+      <li><a href="#pricing">料金</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#" class="nav-login">ログイン</a>
+      <a href="#cta" class="btn btn-primary">無料で始める</a>
+    </div>
+    <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()" aria-label="メニューを開く" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="nav-mobile-menu" id="mobileMenu" role="menu">
+  <a href="#features" onclick="toggleMenu()">機能</a>
+  <a href="#pricing" onclick="toggleMenu()">料金</a>
+  <a href="#faq" onclick="toggleMenu()">FAQ</a>
+  <a href="#cta" class="btn btn-success" style="justify-content:center;margin-top:8px" onclick="toggleMenu()">無料で始める →</a>
+</div>
+
+<!-- ========== HERO ========== -->
+<section class="hero" aria-label="ヒーローセクション">
+  <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-3" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <!-- LEFT: Copy -->
+    <div class="hero-copy">
+      <div class="hero-badge">
+        <div class="hero-badge-dot" aria-hidden="true"></div>
+        小学5年生〜中学3年生向け AI 学習アプリ
+      </div>
+      <h1 class="hero-heading">
+        定期テスト対策は、<br><span class="hero-heading-accent">これ一本。</span>
+      </h1>
+      <p class="hero-sub">
+        テスト2週間前からAIが予想問題を生成。<br>
+        カレンダーが計画して、ランキングで燃える。<br>
+        小学5年生から中学3年生まで。
+      </p>
+      <div class="hero-ctas">
+        <a href="#cta" class="btn btn-success btn-lg">無料で始める →</a>
+        <a href="#features" class="btn btn-ghost btn-lg">機能を見る</a>
+      </div>
+      <p class="hero-cta-note">クレジットカード不要 · 1分で登録完了</p>
+      <div class="hero-stats" style="flex-direction:column;gap:var(--space-3);border-top:none;padding-top:0">
+        <div style="display:inline-flex;align-items:center;gap:var(--space-2);background:rgba(88,204,2,.1);border:1px solid rgba(88,204,2,.25);border-radius:var(--radius-pill);padding:var(--space-2) var(--space-4);font-size:.875rem;font-weight:700;color:var(--color-brand-green)">🚀 2026年夏リリース予定</div>
+        <div style="display:inline-flex;align-items:center;gap:var(--space-2);background:rgba(28,176,246,.1);border:1px solid rgba(28,176,246,.25);border-radius:var(--radius-pill);padding:var(--space-2) var(--space-4);font-size:.875rem;font-weight:700;color:var(--color-brand-blue)">📧 先行登録受付中</div>
+        <div style="display:inline-flex;align-items:center;gap:var(--space-2);background:rgba(255,217,0,.12);border:1px solid rgba(255,217,0,.35);border-radius:var(--radius-pill);padding:var(--space-2) var(--space-4);font-size:.875rem;font-weight:700;color:#B8960A">🎁 早期登録者は初月無料</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Mockups -->
+    <div class="hero-visuals" role="img" aria-label="アプリUI画面プレビュー">
+
+      <!-- ① AI Chat — wrapper for position, mock for float animation -->
+      <div class="mock-chat-pos">
+        <div class="mock mock-chat" aria-label="AI解説チャット">
+          <div class="mock-header">
+            <div class="mock-dots" aria-hidden="true">
+              <div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div>
+            </div>
+            <div class="mock-title">StudyPal AI</div>
+          </div>
+          <div class="chat-messages">
+            <div class="chat-bubble user">二次方程式がわかりません😢</div>
+            <div class="chat-bubble ai d1">
+              <div class="chat-ai-header">
+                <div class="chat-ai-avatar">AI</div>
+                <span class="chat-ai-name">StudyPal AI</span>
+                <span class="ai-badge">✨ AI</span>
+              </div>
+              大丈夫！まず <strong>x²= 9</strong> のとき、xはいくつだと思う？
+            </div>
+            <div class="chat-bubble user" style="animation-delay:.9s">3？</div>
+            <div class="chat-bubble ai d2">
+              <div class="chat-ai-header">
+                <div class="chat-ai-avatar">AI</div>
+                <span class="chat-ai-name">StudyPal AI</span>
+              </div>
+              惜しい！(−3)² も 9 になるよ😊<br>
+              つまり <strong>x = ±3</strong>。これが「二乗の逆」の考え方だよ。
+            </div>
+            <div class="chat-typing" aria-label="入力中">
+              <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <div class="chat-input-fake" aria-hidden="true">質問を入力...</div>
+            <div class="chat-send-btn" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② Ranking (top-right) -->
+      <div class="mock mock-ranking" aria-label="全国ランキング">
+        <div class="mock-header">
+          <div class="mock-dots" aria-hidden="true">
+            <div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div>
+          </div>
+          <div class="mock-title">🏆 全国ランキング</div>
+        </div>
+        <div class="ranking-list">
+          <div class="rank-item rank-1">
+            <div class="rank-medal">🥇</div>
+            <div class="rank-avatar" style="background:linear-gradient(135deg,#FFD700,#FF9600)">た</div>
+            <div class="rank-info"><div class="rank-name">たろう</div><div class="rank-xp">3,840 XP</div></div>
+            <div class="rank-lv">Lv.42</div>
+          </div>
+          <div class="rank-item">
+            <div class="rank-medal">🥈</div>
+            <div class="rank-avatar" style="background:linear-gradient(135deg,#1CB0F6,#9B5DE5)">は</div>
+            <div class="rank-info"><div class="rank-name">はなこ</div><div class="rank-xp">3,210 XP</div></div>
+            <div class="rank-lv">Lv.38</div>
+          </div>
+          <div class="rank-item">
+            <div class="rank-medal">🥉</div>
+            <div class="rank-avatar" style="background:linear-gradient(135deg,#58CC02,#00C9A7)">じ</div>
+            <div class="rank-info"><div class="rank-name">じろう</div><div class="rank-xp">2,980 XP</div></div>
+            <div class="rank-lv">Lv.35</div>
+          </div>
+          <div class="rank-item rank-me">
+            <div class="rank-medal" style="font-size:11px;font-weight:700;color:var(--color-text-muted)">47</div>
+            <div class="rank-avatar" style="background:linear-gradient(135deg,#FF6BB3,#FF9600)">あ</div>
+            <div class="rank-info"><div class="rank-name">あなた</div><div class="rank-xp">1,240 XP</div></div>
+            <span class="rank-me-label">YOU</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ Calendar (bottom-left) -->
+      <div class="mock mock-calendar" aria-label="勉強カレンダー">
+        <div class="mock-header">
+          <div class="mock-dots" aria-hidden="true">
+            <div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div>
+          </div>
+          <div class="mock-title">📅 4月の学習計画</div>
+        </div>
+        <div class="calendar-body">
+          <div class="cal-week-header" aria-hidden="true">
+            <div class="cal-day-name">月</div><div class="cal-day-name">火</div>
+            <div class="cal-day-name">水</div><div class="cal-day-name">木</div>
+            <div class="cal-day-name">金</div><div class="cal-day-name">土</div>
+            <div class="cal-day-name">日</div>
+          </div>
+          <div class="cal-grid" aria-hidden="true">
+            <div class="cal-day">7</div><div class="cal-day has-event ev-club">8</div>
+            <div class="cal-day has-event ev-study">9</div><div class="cal-day has-event ev-study">10</div>
+            <div class="cal-day">11</div><div class="cal-day has-event ev-club">12</div>
+            <div class="cal-day">13</div><div class="cal-day has-event ev-study">14</div>
+            <div class="cal-day today">15</div><div class="cal-day has-event ev-test">16</div>
+            <div class="cal-day">17</div><div class="cal-day">18</div>
+            <div class="cal-day">19</div><div class="cal-day has-event ev-club">20</div>
+            <div class="cal-day">21</div><div class="cal-day has-event ev-study">22</div>
+            <div class="cal-day has-event ev-study">23</div><div class="cal-day has-event ev-test">24</div>
+            <div class="cal-day has-event ev-study">25</div><div class="cal-day">26</div>
+            <div class="cal-day has-event ev-club">27</div>
+          </div>
+          <div class="cal-events">
+            <div class="cal-event"><div class="cal-event-dot" style="background:var(--color-error)"></div><span>数学テスト (16・24日)</span></div>
+            <div class="cal-event"><div class="cal-event-dot" style="background:var(--color-brand-purple)"></div><span>部活 (火・土)</span></div>
+          </div>
+          <div class="cal-xp-label"><span>今週の進捗</span><span>680 / 1000 XP</span></div>
+          <div class="cal-xp-track" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100">
+            <div class="cal-xp-fill"></div>
+          </div>
+          <div class="streak-badge" style="margin-top:8px">
+            <span class="streak-icon" aria-hidden="true">🔥</span>
+            <span class="streak-text">7日連続ストリーク！</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /hero-visuals -->
+  </div><!-- /hero-inner -->
+
+  <!-- Launch Info Bar -->
+  <div class="hero-stats-bar">
+    <div class="hero-stats-bar-inner">
+      <div class="stat-item"><div class="stat-icon">🚀</div><div><div class="stat-value" style="font-size:1.1rem">2026年夏</div><div class="stat-desc">リリース予定</div></div></div>
+      <div class="stat-divider" aria-hidden="true"></div>
+      <div class="stat-item"><div class="stat-icon">📧</div><div><div class="stat-value" style="font-size:1.1rem">先行登録</div><div class="stat-desc">受付中</div></div></div>
+      <div class="stat-divider" aria-hidden="true"></div>
+      <div class="stat-item"><div class="stat-icon">🎁</div><div><div class="stat-value" style="font-size:1.1rem">初月無料</div><div class="stat-desc">早期登録者限定</div></div></div>
+      <div class="stat-divider" aria-hidden="true"></div>
+      <div class="stat-item"><div class="stat-icon">🎓</div><div><div class="stat-value" style="font-size:1.1rem">小5〜中3</div><div class="stat-desc">対応学年</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PROBLEM ========== -->
+<section id="problem" class="section section-problem">
+  <div class="section-inner section-center">
+    <div class="section-label fade-up">こんな悩み、ありませんか？</div>
+    <h2 class="section-heading fade-up d1">勉強が続かない理由、<br>全部解決します。</h2>
+    <div class="problem-grid">
+      <div>
+        <div class="problem-who">
+          <span class="problem-who-label child">👦 子ども視点</span>
+        </div>
+        <div class="problem-card fade-up">
+          <div class="problem-emoji">📚</div>
+          <div class="problem-title">教科書を読んでも意味がわからない</div>
+          <div class="problem-desc">学校の説明が難しすぎて、どこから手をつければいいかわからない。</div>
+        </div>
+        <div style="height:var(--space-5)"></div>
+        <div class="problem-card fade-up d1">
+          <div class="problem-emoji">😴</div>
+          <div class="problem-title">勉強が続かない、すぐ飽きる</div>
+          <div class="problem-desc">ゲームやYouTubeに比べて、勉強は楽しくない。やる気が出ない。</div>
+        </div>
+      </div>
+      <div>
+        <div class="problem-who">
+          <span class="problem-who-label parent">👨‍👩‍👧 保護者視点</span>
+        </div>
+        <div class="problem-card fade-up d1">
+          <div class="problem-emoji">📅</div>
+          <div class="problem-title">部活と勉強の両立ができているか不安</div>
+          <div class="problem-desc">塾に行く時間もないのに、テストが近づいてどう準備すればいいか。</div>
+        </div>
+        <div style="height:var(--space-5)"></div>
+        <div class="problem-card fade-up d2">
+          <div class="problem-emoji">📊</div>
+          <div class="problem-title">子どもが何をどれだけ勉強したかわからない</div>
+          <div class="problem-desc">「勉強してる」と言っても、本当に身についているか確認できない。</div>
+        </div>
+      </div>
+    </div>
+    <div class="problem-arrow fade-up">
+      <div class="problem-arrow-text">StudyPal がぜんぶ解決します ↓</div>
+      <div class="problem-arrow-sub">AI予想問題 × スマートカレンダー × ランキングの三位一体</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FEATURES ========== -->
+<section id="features" class="section section-features">
+  <div class="section-inner">
+    <div class="section-center">
+      <div class="section-label fade-up">StudyPalでできること</div>
+      <h2 class="section-heading fade-up d1">テスト範囲を撮るだけ。<br>AIが全部やってくれる。</h2>
+    </div>
+
+    <div class="feature-rows">
+
+      <!-- Feature 1: AI予想問題生成 -->
+      <div class="feature-row fade-up">
+        <div class="feature-copy">
+          <div class="feature-num">01</div>
+          <div class="feature-tag">🤖 AI予想問題生成</div>
+          <h3 class="feature-title">テストの範囲を撮影するだけ。<br>AIが予想問題を自動生成。</h3>
+          <p class="feature-desc">テストの範囲・教科書・プリントを撮影するだけ。AIがテストに出そうな予想問題を自動生成。繰り返し解いて確実に点数を上げる。</p>
+          <div class="feature-points">
+            <div class="feature-point">四択・穴埋め・記述の3形式に対応</div>
+            <div class="feature-point">写真・PDF・テキスト入力に対応</div>
+            <div class="feature-point">解説付きで弱点を確実に克服</div>
+          </div>
+        </div>
+        <div>
+          <div class="feat-screen">
+            <div class="feat-screen-bar">
+              <div class="feat-screen-bar-dots"><span></span><span></span><span></span></div>
+              <div class="feat-screen-title">✨ AI予想問題生成中</div>
+            </div>
+            <div class="feat-screen-body">
+              <div class="feat-photo-preview">
+                <div class="feat-photo-icon">📷</div>
+                <div class="feat-photo-text">数学 第3章「二次方程式」を撮影しました</div>
+              </div>
+              <div class="feat-chat-bubble ai-msg">
+                <div class="chat-ai-header" style="margin-bottom:6px">
+                  <div class="chat-ai-avatar">AI</div>
+                  <span class="chat-ai-name">StudyPal AI</span>
+                  <span class="ai-badge">✨ 生成完了</span>
+                </div>
+                <strong>10問の予想問題を生成しました！</strong><br>
+                四択 3問 · 穴埋め 4問 · 記述 3問
+              </div>
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+                <div style="background:rgba(88,204,2,.15);border:1px solid rgba(88,204,2,.3);border-radius:8px;padding:8px 12px;font-size:.8rem;color:#89E219">Q1. x²−5x+6=0 の解は？（四択）</div>
+                <div style="background:rgba(28,176,246,.1);border:1px solid rgba(28,176,246,.2);border-radius:8px;padding:8px 12px;font-size:.8rem;color:var(--color-brand-blue)">Q2. (x−3)(x+__)=0 を完成せよ（穴埋め）</div>
+                <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;font-size:.8rem;color:#A0A0A8">Q3. 解の公式を使って… （記述）</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 2: Calendar (reversed) -->
+      <div class="feature-row rev fade-up">
+        <div class="feature-copy">
+          <div class="feature-num">02</div>
+          <div class="feature-tag">📅 スマートカレンダー</div>
+          <h3 class="feature-title">テスト日・部活を登録するだけ。<br>AIが2週間前から逆算。</h3>
+          <p class="feature-desc">テスト日・部活・イベントを登録するだけ。AIが2週間前から逆算して、最適な学習スケジュールを自動提案します。</p>
+          <div class="feature-points">
+            <div class="feature-point">部活・イベントを除いた空き時間を自動検出</div>
+            <div class="feature-point">テストまでの日数から学習量を逆算</div>
+            <div class="feature-point">科目バランスを考慮した最適プラン生成</div>
+          </div>
+        </div>
+        <div>
+          <div class="feat-screen">
+            <div class="feat-screen-bar">
+              <div class="feat-screen-bar-dots"><span></span><span></span><span></span></div>
+              <div class="feat-screen-title">📅 今週の学習プラン</div>
+            </div>
+            <div class="feat-screen-body">
+              <div style="font-size:.75rem;color:rgba(255,255,255,.4);margin-bottom:10px">4月15日(月) — 4月21日(日)</div>
+              <div class="feat-cal-ai-card">
+                <div class="feat-cal-ai-label">✨ AIが空き時間を検出しました</div>
+                <div class="feat-cal-plan-row">
+                  <span class="feat-cal-plan-day">月</span>
+                  <span class="feat-cal-plan-subject">数学：二次方程式</span>
+                  <span class="feat-cal-plan-time">20分</span>
+                </div>
+                <div class="feat-cal-plan-row">
+                  <span class="feat-cal-plan-day">水</span>
+                  <span class="feat-cal-plan-subject">理科：化学反応式</span>
+                  <span class="feat-cal-plan-time">15分</span>
+                </div>
+                <div class="feat-cal-plan-row">
+                  <span class="feat-cal-plan-day">木</span>
+                  <span class="feat-cal-plan-subject">英語：不規則動詞</span>
+                  <span class="feat-cal-plan-time">25分</span>
+                </div>
+                <div class="feat-cal-plan-row">
+                  <span class="feat-cal-plan-day">金</span>
+                  <span class="feat-cal-plan-subject">数学：テスト対策</span>
+                  <span class="feat-cal-plan-time">30分</span>
+                </div>
+              </div>
+              <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:.75rem;color:rgba(255,255,255,.4)">週合計</span>
+                <span style="font-size:.875rem;font-weight:700;color:var(--color-brand-green)">1時間30分</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 3: Ranking -->
+      <div class="feature-row fade-up">
+        <div class="feature-copy">
+          <div class="feature-num">03</div>
+          <div class="feature-tag">🏆 ランキング</div>
+          <h3 class="feature-title">勉強した分だけ<br>ランキングが上がる</h3>
+          <p class="feature-desc">勉強した時間・解いた問題数でスコア計算。週間・月間・科目別の全国ランキング。ライバルと競いながら自然と勉強が続く。</p>
+          <div class="feature-points">
+            <div class="feature-point">問題正解 10pt / 問</div>
+            <div class="feature-point">勉強時間 1pt / 分・ストリーク 20pt / 日</div>
+            <div class="feature-point">週間・月間・科目別の全国ランキング</div>
+          </div>
+        </div>
+        <div>
+          <div class="feat-screen">
+            <div class="feat-screen-bar">
+              <div class="feat-screen-bar-dots"><span></span><span></span><span></span></div>
+              <div class="feat-screen-title">🏆 今週のランキング</div>
+            </div>
+            <div class="feat-screen-body">
+              <div style="display:flex;gap:8px;margin-bottom:12px">
+                <div style="flex:1;background:rgba(28,176,246,.15);border:1px solid rgba(28,176,246,.25);border-radius:20px;padding:4px 10px;font-size:.7rem;font-weight:700;color:var(--color-brand-blue);text-align:center">週間</div>
+                <div style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:4px 10px;font-size:.7rem;font-weight:700;color:rgba(255,255,255,.3);text-align:center">月間</div>
+                <div style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:4px 10px;font-size:.7rem;font-weight:700;color:rgba(255,255,255,.3);text-align:center">科目別</div>
+              </div>
+              <div class="feat-mini-rank">
+                <div class="feat-mini-rank-row"><span class="feat-mini-rank-num">🥇</span><span class="feat-mini-rank-name">たろう</span><span class="feat-mini-rank-xp">3,840pt</span></div>
+                <div class="feat-mini-rank-row"><span class="feat-mini-rank-num">🥈</span><span class="feat-mini-rank-name">はなこ</span><span class="feat-mini-rank-xp">3,210pt</span></div>
+                <div class="feat-mini-rank-row"><span class="feat-mini-rank-num">🥉</span><span class="feat-mini-rank-name">じろう</span><span class="feat-mini-rank-xp">2,980pt</span></div>
+                <div class="feat-mini-rank-row" style="background:rgba(28,176,246,.08);border-radius:6px;padding:5px 4px"><span class="feat-mini-rank-num" style="color:var(--color-brand-blue)">12</span><span class="feat-mini-rank-name" style="color:var(--color-brand-blue)">あなた</span><span class="feat-mini-rank-xp">1,240pt</span></div>
+              </div>
+              <div style="margin-top:12px;background:rgba(255,150,0,.1);border:1px solid rgba(255,150,0,.25);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px">
+                <span style="font-size:1.1rem">🔥</span>
+                <span style="font-size:.8rem;font-weight:700;color:var(--color-streak)">7日連続ストリーク！ +140pt</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== SOCIAL PROOF ========== -->
+<section id="social-proof" class="section section-proof">
+  <div class="section-inner section-center">
+    <div class="section-label fade-up">利用者の声</div>
+    <h2 class="section-heading fade-up d1">先行登録者の声</h2>
+    <p class="section-sub fade-up d2">全国の小中学生と保護者から届いたリアルな声</p>
+    <div class="proof-grid" style="margin-top:var(--space-12)">
+      <div class="proof-card fade-up">
+        <div class="proof-stars">★★★★★</div>
+        <p class="proof-text">「ランキング1位を目指してたら、気づいたら数学が好きになってた！毎日やりたいって思う初めての勉強アプリ」</p>
+        <div class="proof-author">
+          <div class="proof-avatar" style="background:linear-gradient(135deg,#FFD700,#FF9600)">た</div>
+          <div>
+            <div class="proof-name">たろう</div>
+            <div class="proof-role">小学6年生 / 数学・理科が苦手</div>
+          </div>
+        </div>
+      </div>
+      <div class="proof-card fade-up d1">
+        <div class="proof-stars">★★★★★</div>
+        <p class="proof-text">「子どもが自分からスマホを開いて勉強するようになりました。週次レポートで学習状況も確認できて安心です」</p>
+        <div class="proof-author">
+          <div class="proof-avatar" style="background:linear-gradient(135deg,#9B5DE5,#1CB0F6)">み</div>
+          <div>
+            <div class="proof-name">みかこさん（保護者）</div>
+            <div class="proof-role">中学1年生のお母さん</div>
+          </div>
+        </div>
+      </div>
+      <div class="proof-card fade-up d2">
+        <div class="proof-stars">★★★★★</div>
+        <p class="proof-text">「部活が忙しくてもAIが隙間時間を見つけてくれる。テスト1週間前から自動で計画を立て直してくれて助かった！」</p>
+        <div class="proof-author">
+          <div class="proof-avatar" style="background:linear-gradient(135deg,#58CC02,#00C9A7)">は</div>
+          <div>
+            <div class="proof-name">はなこ</div>
+            <div class="proof-role">中学2年生 / 運動部所属</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PRICING ========== -->
+<section id="pricing" class="section section-pricing">
+  <div class="section-inner section-center">
+    <div class="section-label fade-up">料金プラン</div>
+    <h2 class="section-heading fade-up d1">まずは無料から始めよう</h2>
+    <p class="section-sub fade-up d2">いつでもアップグレード・解約できます</p>
+    <div class="pricing-grid fade-up">
+
+      <!-- FREE -->
+      <div class="pricing-card">
+        <div class="pricing-plan">FREE</div>
+        <div class="pricing-price">¥0<span></span></div>
+        <div class="pricing-period">ずっと無料</div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-features">
+          <div class="pricing-feature on">AI予想問題生成 月3回</div>
+          <div class="pricing-feature on">基本カレンダー</div>
+          <div class="pricing-feature on">ランキング閲覧</div>
+          <div class="pricing-feature off">スマートカレンダー（自動計画）</div>
+          <div class="pricing-feature off">保護者ダッシュボード</div>
+        </div>
+        <a href="#cta" class="pricing-cta free">無料で始める</a>
+      </div>
+
+      <!-- PRO -->
+      <div class="pricing-card featured">
+        <div class="pricing-badge">🏆 一番人気</div>
+        <div class="pricing-plan">PRO</div>
+        <div class="pricing-price">¥480<span>/月</span></div>
+        <div class="pricing-period">年払い ¥4,320 (2ヶ月分お得)</div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-features">
+          <div class="pricing-feature on">AI予想問題生成 <strong>無制限</strong></div>
+          <div class="pricing-feature on">スマートカレンダー（自動計画）</div>
+          <div class="pricing-feature on">全国ランキング（週・月・科目別）</div>
+          <div class="pricing-feature off">保護者ダッシュボード</div>
+          <div class="pricing-feature off">週次学習レポート</div>
+        </div>
+        <a href="#cta" class="pricing-cta pro">Proを始める</a>
+      </div>
+
+      <!-- FAMILY -->
+      <div class="pricing-card">
+        <div class="pricing-plan">FAMILY</div>
+        <div class="pricing-price">¥780<span>/月</span></div>
+        <div class="pricing-period">子ども複数アカウント対応</div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-features">
+          <div class="pricing-feature on">Pro全機能</div>
+          <div class="pricing-feature on">保護者ダッシュボード</div>
+          <div class="pricing-feature on">週次学習レポート</div>
+          <div class="pricing-feature on">子ども複数アカウント</div>
+        </div>
+        <a href="#cta" class="pricing-cta fam">Familyを始める</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== FAQ ========== -->
+<section id="faq" class="section section-faq">
+  <div class="section-inner section-center">
+    <div class="section-label fade-up">よくある質問</div>
+    <h2 class="section-heading fade-up d1">FAQ</h2>
+    <div class="faq-list">
+
+      <div class="faq-item fade-up">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span class="faq-q-text">無料プランはどこまで使えますか？</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">無料プランでは、AI予想問題生成が月3回・基本カレンダー・ランキング閲覧が利用できます。AI問題生成の無制限利用・スマートカレンダー（自動計画）・保護者ダッシュボードを利用するにはProまたはFamilyプランへのアップグレードが必要です。クレジットカードなしで今すぐ始められます。</div>
+        </div>
+      </div>
+
+      <div class="faq-item fade-up d1">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span class="faq-q-text">何年生から何年生まで対応していますか？</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">小学5年生〜中学3年生を主な対象としています。AIが学年を自動で判別し、学年に合ったやさしい言葉で解説します。小学5・6年生にも対応しているのはStudyPalのみで、中高生向けの競合サービスとの大きな差別化ポイントです。</div>
+        </div>
+      </div>
+
+      <div class="faq-item fade-up d2">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span class="faq-q-text">保護者の管理機能について教えてください</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">Familyプランでは、保護者専用ダッシュボードから「今週何時間勉強したか」「どの科目を学んだか」「ランキング順位の推移」などが確認できます。毎週月曜日に週次レポートがメールで届き、学習の継続をサポートします。</div>
+        </div>
+      </div>
+
+      <div class="faq-item fade-up d1">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span class="faq-q-text">どんな科目や教材に対応していますか？</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">数学・英語・理科・社会・国語の5教科に対応しています。教科書・プリント・テスト問題の写真を撮影するだけでAIが内容を解析。どの出版社・教材でも対応可能です。PDFのアップロードにも対応しています。</div>
+        </div>
+      </div>
+
+      <div class="faq-item fade-up d2">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span class="faq-q-text">解約はいつでもできますか？</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">はい、いつでも解約できます。解約後は次の更新日まで有料プランの機能が利用でき、期間終了後は自動的に無料プランに移行します。違約金や解約手数料は一切ありません。</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== FINAL CTA ========== -->
+<section id="cta" class="section section-cta">
+  <div class="cta-orb cta-orb-1" aria-hidden="true"></div>
+  <div class="cta-orb cta-orb-2" aria-hidden="true"></div>
+  <div class="cta-inner">
+    <div class="section-label fade-up" style="justify-content:center;color:rgba(255,255,255,.5)">今すぐ始めよう</div>
+    <h2 class="cta-heading fade-up d1">
+      今すぐ勉強を<br><span class="cta-heading-accent">変えよう。</span>
+    </h2>
+    <p class="cta-sub fade-up d2">
+      無料で始められます。クレジットカード不要。<br>
+      登録後すぐにAI解説・カレンダー・ランキングを体験できます。
+    </p>
+    <form class="cta-form fade-up d2" onsubmit="handleCta(event)">
+      <input class="cta-input" type="email" placeholder="メールアドレスを入力" required aria-label="メールアドレス">
+      <button type="submit" class="btn btn-success btn-lg">無料で始める →</button>
+    </form>
+    <p class="cta-note fade-up d3">クレジットカード不要 · 最初の1ヶ月は全機能無料</p>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="footer-logo-icon">📚</div>StudyPal
+        </div>
+        <div class="footer-tagline">定期テスト対策は、これ一本。小学5年生から中学3年生まで。</div>
+      </div>
+      <div class="footer-links-wrap">
+        <div class="footer-links-group">
+          <div class="footer-links-title">プロダクト</div>
+          <div class="footer-links">
+            <a href="#features">機能</a>
+            <a href="#pricing">料金</a>
+            <a href="#faq">FAQ</a>
+          </div>
+        </div>
+        <div class="footer-links-group">
+          <div class="footer-links-title">サポート</div>
+          <div class="footer-links">
+            <a href="#">ヘルプセンター</a>
+            <a href="#">お問い合わせ</a>
+            <a href="#">保護者向け情報</a>
+          </div>
+        </div>
+        <div class="footer-links-group">
+          <div class="footer-links-title">法的情報</div>
+          <div class="footer-links">
+            <a href="#">利用規約</a>
+            <a href="#">プライバシーポリシー</a>
+            <a href="#">特定商取引法</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 StudyPal Inc. All rights reserved.</div>
+      <div class="footer-badges">
+        <div class="footer-badge">🚀 2026年夏リリース予定</div>
+        <div class="footer-badge">子ども安心アプリ</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Mobile menu
+function toggleMenu(){
+  const m=document.getElementById('mobileMenu'),b=document.getElementById('hamburger');
+  const o=m.classList.toggle('open');
+  b.setAttribute('aria-expanded',o);
+}
+document.addEventListener('click',(e)=>{
+  const m=document.getElementById('mobileMenu'),b=document.getElementById('hamburger');
+  if(m.classList.contains('open')&&!m.contains(e.target)&&!b.contains(e.target)){
+    m.classList.remove('open');b.setAttribute('aria-expanded','false');
+  }
+});
+
+// Nav scroll shadow
+const nav=document.querySelector('.nav');
+window.addEventListener('scroll',()=>{
+  nav.style.boxShadow=window.scrollY>10?'0 1px 20px rgba(0,0,0,.08)':'none';
+},{passive:true});
+
+// Scroll fade-up
+const obs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});
+},{threshold:.12,rootMargin:'0px 0px -32px 0px'});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+
+// FAQ accordion
+function toggleFaq(btn){
+  const item=btn.closest('.faq-item');
+  const wasOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!wasOpen) item.classList.add('open');
+}
+
+// CTA form
+function handleCta(e){
+  e.preventDefault();
+  const btn=e.target.querySelector('button');
+  btn.textContent='✓ 登録完了！';
+  btn.style.background='var(--color-brand-green)';
+  btn.disabled=true;
+}
+</script>
+</body>
+</html>
