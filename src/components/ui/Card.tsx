@@ -1,3 +1,5 @@
+"use client";
+
 import { type HTMLAttributes } from "react";
 
 type CardVariant = "default" | "achievement" | "hover";

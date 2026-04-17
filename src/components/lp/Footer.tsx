@@ -1,3 +1,5 @@
+"use client";
+
 const LINK_GROUPS = [
   {
     title: "プロダクト",
