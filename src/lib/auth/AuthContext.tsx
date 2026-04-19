@@ -35,7 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // クライアントサイドでのみ Firebase を初期化
     const unsubscribe = onAuthStateChanged(auth(), (user) => {
       setCurrentUser(user);
       setLoading(false);

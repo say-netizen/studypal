@@ -24,8 +24,10 @@ export default function LoginPage() {
     try {
       await signInWithGoogle();
       router.push(redirect);
-    } catch {
-      setError("Googleログインに失敗しました。もう一度お試しください。");
+    } catch (e: unknown) {
+      const code = (e as { code?: string }).code ?? "unknown";
+      console.error("Google login error:", code, e);
+      setError(`Googleログインに失敗しました。(${code})`);
     } finally {
       setLoading(false);
     }
