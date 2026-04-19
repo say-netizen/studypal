@@ -151,8 +151,8 @@ export function HeroSection() {
 
           {/* CTAボタン */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", marginBottom: "12px" }}>
-            <ButtonLink href="#cta" variant="success" size="lg">
-              先行登録する →
+            <ButtonLink href="/register" variant="success" size="lg">
+              無料で始める →
             </ButtonLink>
             <ButtonLink href="#features" variant="ghost" size="lg">
               機能を見る
@@ -162,12 +162,12 @@ export function HeroSection() {
             クレジットカード不要 · 1分で登録完了
           </p>
 
-          {/* リリース情報バッジ */}
+          {/* アプリ情報バッジ */}
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {[
-              { emoji: "🚀", text: "2026年夏リリース予定", bg: "rgba(88,204,2,.1)", border: "rgba(88,204,2,.25)", color: "var(--color-brand-green)" },
-              { emoji: "📧", text: "先行登録受付中", bg: "rgba(28,176,246,.1)", border: "rgba(28,176,246,.25)", color: "var(--color-brand-blue)" },
-              { emoji: "🎁", text: "早期登録者は初月無料", bg: "rgba(255,217,0,.12)", border: "rgba(255,217,0,.35)", color: "#B8960A" },
+              { emoji: "✅", text: "今すぐ使える", bg: "rgba(88,204,2,.1)", border: "rgba(88,204,2,.25)", color: "var(--color-brand-green)" },
+              { emoji: "🎮", text: "AI学習ゲーム搭載", bg: "rgba(28,176,246,.1)", border: "rgba(28,176,246,.25)", color: "var(--color-brand-blue)" },
+              { emoji: "🎁", text: "Proプラン7日間無料", bg: "rgba(255,217,0,.12)", border: "rgba(255,217,0,.35)", color: "#B8960A" },
             ].map(({ emoji, text, bg, border, color }) => (
               <div
                 key={text}
@@ -320,9 +320,9 @@ export function HeroSection() {
       <div style={{ background: "var(--color-bg-secondary)", borderTop: "1px solid var(--color-border)", padding: "20px 24px" }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", gap: "48px", flexWrap: "wrap" }}>
           {[
-            { icon: "🚀", value: "2026年夏", desc: "リリース予定" },
-            { icon: "📧", value: "先行登録", desc: "受付中" },
-            { icon: "🎁", value: "初月無料", desc: "早期登録者限定" },
+            { icon: "✅", value: "今すぐ", desc: "使える" },
+            { icon: "🎮", value: "AI学習", desc: "ゲーム搭載" },
+            { icon: "🎁", value: "7日間", desc: "Proを無料体験" },
             { icon: "🎓", value: "小5〜中3", desc: "対応学年" },
           ].map(({ icon, value, desc }) => (
             <div key={desc} style={{ display: "flex", alignItems: "center", gap: "12px" }}>

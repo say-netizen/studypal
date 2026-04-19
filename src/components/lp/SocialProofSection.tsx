@@ -32,10 +32,10 @@ export function SocialProofSection() {
           利用者の声
         </div>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.75rem,3.5vw,2.75rem)", fontWeight: 900, lineHeight: 1.15, color: "var(--color-text-primary)", marginBottom: "8px", letterSpacing: "-0.02em" }}>
-          先行登録者の声
+          ユーザーの声
         </h2>
         <p style={{ fontSize: "1.0625rem", color: "var(--color-text-secondary)", lineHeight: 1.7, maxWidth: "560px", margin: "0 auto" }}>
-          全国の小中学生と保護者から届いたリアルな声
+          全国の小中学生と保護者から届いた声
         </p>
 
         <div

@@ -141,8 +141,8 @@ export function Navbar() {
             >
               ログイン
             </Link>
-            <ButtonLink href="#cta" variant="primary" size="sm" className="hidden md:inline-flex">
-              先行登録する
+            <ButtonLink href="/register" variant="primary" size="sm" className="hidden md:inline-flex">
+              無料で始める
             </ButtonLink>
 
             {/* ハンバーガー */}
@@ -222,13 +222,13 @@ export function Navbar() {
             </a>
           ))}
           <ButtonLink
-            href="#cta"
+            href="/register"
             variant="success"
             size="md"
             style={{ justifyContent: "center", marginTop: "8px" }}
             onClick={() => setMenuOpen(false)}
           >
-            先行登録する →
+            無料で始める →
           </ButtonLink>
         </div>
       )}

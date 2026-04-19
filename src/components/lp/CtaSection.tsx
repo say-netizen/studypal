@@ -1,16 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
 export function CtaSection() {
-  const [email, setEmail] = useState("");
-  const [done, setDone] = useState(false);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setDone(true);
-  }
-
   return (
     <section
       id="cta"
@@ -36,84 +26,69 @@ export function CtaSection() {
           <span style={{ color: "var(--color-xp-gold)" }}>変えよう。</span>
         </h2>
         <p style={{ fontSize: "1.0625rem", color: "rgba(255,255,255,.65)", marginBottom: "40px", lineHeight: 1.6 }}>
-          先行登録で初月無料。クレジットカード不要。<br />
-          2026年夏のリリース後すぐに使えます。
+          無料プランですぐに始められます。クレジットカード不要。<br />
+          Proプランは7日間無料でお試しいただけます。
         </p>
 
-        {done ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
-            <div style={{ width: "64px", height: "64px", background: "var(--color-brand-green)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", animation: "bounceIn 0.5s ease" }}>✓</div>
-            <p style={{ fontSize: "1.25rem", fontWeight: 700, color: "#fff" }}>登録完了！</p>
-            <p style={{ fontSize: "0.9375rem", color: "rgba(255,255,255,.6)" }}>リリース時にメールでお知らせします 🎉</p>
-          </div>
-        ) : (
-          <form
-            onSubmit={handleSubmit}
-            style={{ display: "flex", gap: "12px", maxWidth: "480px", margin: "0 auto 16px", flexWrap: "wrap" }}
+        <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "20px" }}>
+          <a
+            href="/register"
+            style={{
+              background: "var(--color-brand-green)",
+              color: "#fff",
+              border: "none",
+              borderRadius: "var(--radius-pill)",
+              padding: "16px 36px",
+              fontSize: "1.0625rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              boxShadow: "0 4px 15px rgba(88,204,2,0.4)",
+              textDecoration: "none",
+              display: "inline-block",
+              fontFamily: "var(--font-ui)",
+              transition: "transform 120ms, box-shadow 120ms",
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-2px)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = ""; }}
           >
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="メールアドレスを入力"
-              required
-              aria-label="メールアドレス"
-              style={{
-                flex: 1,
-                minWidth: "0",
-                background: "rgba(255,255,255,.1)",
-                border: "1px solid rgba(255,255,255,.2)",
-                borderRadius: "var(--radius-pill)",
-                padding: "14px 22px",
-                fontSize: "1rem",
-                color: "#fff",
-                fontFamily: "var(--font-ui)",
-                outline: "none",
-                transition: "border-color 200ms, background 200ms",
-              }}
-              onFocus={(e) => {
-                (e.currentTarget as HTMLInputElement).style.borderColor = "var(--color-brand-blue)";
-                (e.currentTarget as HTMLInputElement).style.background = "rgba(255,255,255,.15)";
-              }}
-              onBlur={(e) => {
-                (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,.2)";
-                (e.currentTarget as HTMLInputElement).style.background = "rgba(255,255,255,.1)";
-              }}
-            />
-            <button
-              type="submit"
-              style={{
-                background: "var(--color-brand-green)",
-                color: "#fff",
-                border: "none",
-                borderRadius: "var(--radius-pill)",
-                padding: "14px 28px",
-                fontSize: "1.0625rem",
-                fontWeight: 700,
-                cursor: "pointer",
-                boxShadow: "0 4px 15px rgba(88,204,2,0.4)",
-                transition: "transform 120ms, box-shadow 120ms",
-                fontFamily: "var(--font-ui)",
-                whiteSpace: "nowrap",
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-            >
-              先行登録する →
-            </button>
-          </form>
-        )}
+            無料で始める →
+          </a>
+          <a
+            href="/login"
+            style={{
+              background: "transparent",
+              color: "rgba(255,255,255,.8)",
+              border: "1.5px solid rgba(255,255,255,.25)",
+              borderRadius: "var(--radius-pill)",
+              padding: "16px 36px",
+              fontSize: "1.0625rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              textDecoration: "none",
+              display: "inline-block",
+              fontFamily: "var(--font-ui)",
+              transition: "border-color 150ms, background 150ms",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,.6)";
+              (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,.06)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,.25)";
+              (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+            }}
+          >
+            ログイン
+          </a>
+        </div>
 
-        {!done && (
-          <p style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,.4)" }}>
-            クレジットカード不要 · 早期登録者は初月無料
-          </p>
-        )}
+        <p style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,.4)" }}>
+          クレジットカード不要 · いつでも解約OK
+        </p>
       </div>
 
       <style>{`
-        @keyframes bounceIn { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
-        @media(max-width:480px){ .cta-form{flex-direction:column} }
+        @media(max-width:480px){ .cta-btns{flex-direction:column;align-items:stretch} }
       `}</style>
     </section>
   );
