@@ -61,8 +61,10 @@ export default function RegisterPage() {
       const { uid, displayName, email: userEmail } = result.user;
       await createUserDoc(uid, displayName ?? "ゲスト", userEmail ?? "");
       router.push("/dashboard");
-    } catch {
-      setError("Googleでの登録に失敗しました。もう一度お試しください。");
+    } catch (e: unknown) {
+      const code = (e as { code?: string }).code ?? "unknown";
+      console.error("Google register error:", code, e);
+      setError(`Googleでの登録に失敗しました。(${code})`);
     } finally {
       setLoading(false);
     }
