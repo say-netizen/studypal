@@ -331,7 +331,7 @@ export default function CalendarPage() {
                       {s.title}
                     </p>
                     <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                      {TYPE_LABELS[s.type]}
+                      {s.startTime ? `${s.startTime} · ` : ""}{TYPE_LABELS[s.type]}
                       {s.duration > 0 ? ` · ${s.duration}分` : ""}
                     </p>
                   </div>

@@ -59,6 +59,7 @@ export interface QuestionDoc {
 export interface ScheduleDoc {
   userId: string;
   date: string;        // YYYY-MM-DD
+  startTime: string | null;  // HH:MM
   subject: string | null;
   duration: number;    // 分
   type: "study" | "club" | "event" | "test";
@@ -199,6 +200,24 @@ export async function deleteQuestion(questionId: string) {
 
 export async function createSchedule(data: Omit<ScheduleDoc, "createdAt">) {
   return addDoc(collection(db(), "schedules"), { ...data, createdAt: serverTimestamp() });
+}
+
+/** 繰り返し予定を一括作成（毎週N回分） */
+export async function createRecurringSchedules(
+  base: Omit<ScheduleDoc, "createdAt" | "date">,
+  startDate: string,
+  weeks: number
+) {
+  const promises = [];
+  for (let i = 0; i < weeks; i++) {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + i * 7);
+    const dateStr = d.toISOString().slice(0, 10);
+    promises.push(
+      addDoc(collection(db(), "schedules"), { ...base, date: dateStr, createdAt: serverTimestamp() })
+    );
+  }
+  return Promise.all(promises);
 }
 
 export async function getSchedulesByDate(uid: string, date: string) {
