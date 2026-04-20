@@ -73,8 +73,10 @@ export default function NewEventPage() {
 
       router.push("/calendar");
     } catch (err) {
-      console.error("Schedule save error:", err);
-      setError("予定の保存に失敗しました。もう一度お試しください。");
+      const code = (err as { code?: string }).code ?? "unknown";
+      const msg = (err as { message?: string }).message ?? "";
+      console.error("Schedule save error:", code, err);
+      setError(`保存失敗: ${code} — ${msg}`);
     } finally {
       setSaving(false);
     }
