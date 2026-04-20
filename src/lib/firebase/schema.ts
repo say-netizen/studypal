@@ -66,6 +66,16 @@ export interface ScheduleDoc {
   createdAt: Timestamp;
 }
 
+export interface StudySessionDoc {
+  userId: string;
+  subject: string;
+  plannedMinutes: number;  // 0 = 予定なし（自由学習）
+  actualMinutes: number;
+  scheduleId: string | null;
+  date: string; // YYYY-MM-DD
+  createdAt: Timestamp;
+}
+
 export interface RankingEntry {
   nickname: string;
   score: number;
@@ -220,6 +230,37 @@ export async function updateSchedule(scheduleId: string, data: Partial<ScheduleD
 
 export async function deleteSchedule(scheduleId: string) {
   await deleteDoc(doc(db(), "schedules", scheduleId));
+}
+
+// ─────────────────────────────────────────
+// studySessions
+// ─────────────────────────────────────────
+
+export async function createStudySession(data: Omit<StudySessionDoc, "createdAt">) {
+  return addDoc(collection(db(), "studySessions"), { ...data, createdAt: serverTimestamp() });
+}
+
+export async function getStudySessionsByDate(uid: string, date: string) {
+  const q = query(
+    collection(db(), "studySessions"),
+    where("userId", "==", uid),
+    where("date", "==", date),
+    orderBy("createdAt", "asc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => snapToData<StudySessionDoc>(d));
+}
+
+export async function getStudySessionRange(uid: string, startDate: string, endDate: string) {
+  const q = query(
+    collection(db(), "studySessions"),
+    where("userId", "==", uid),
+    where("date", ">=", startDate),
+    where("date", "<=", endDate),
+    orderBy("date", "asc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => snapToData<StudySessionDoc>(d));
 }
 
 // ─────────────────────────────────────────

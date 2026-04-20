@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { getScheduleRange, deleteSchedule, type ScheduleDoc } from "@/lib/firebase/schema";
+import { getScheduleRange, getStudySessionRange, deleteSchedule, type ScheduleDoc, type StudySessionDoc } from "@/lib/firebase/schema";
 import {
   format,
   startOfMonth,
@@ -47,6 +47,7 @@ export default function CalendarPage() {
   const { currentUser } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [schedules, setSchedules] = useState<(ScheduleDoc & { id: string })[]>([]);
+  const [sessions, setSessions] = useState<(StudySessionDoc & { id: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
@@ -59,8 +60,12 @@ export default function CalendarPage() {
     try {
       const startStr = format(monthStart, "yyyy-MM-dd");
       const endStr = format(monthEnd, "yyyy-MM-dd");
-      const data = await getScheduleRange(currentUser.uid, startStr, endStr);
-      setSchedules(data as (ScheduleDoc & { id: string })[]);
+      const [sched, sess] = await Promise.all([
+        getScheduleRange(currentUser.uid, startStr, endStr),
+        getStudySessionRange(currentUser.uid, startStr, endStr),
+      ]);
+      setSchedules(sched as (ScheduleDoc & { id: string })[]);
+      setSessions(sess as (StudySessionDoc & { id: string })[]);
     } finally {
       setLoading(false);
     }
@@ -87,11 +92,25 @@ export default function CalendarPage() {
     return map;
   }, [schedules]);
 
+  // 日付ごとの実績分数合計
+  const actualMinutesByDate = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const s of sessions) {
+      map[s.date] = (map[s.date] ?? 0) + s.actualMinutes;
+    }
+    return map;
+  }, [sessions]);
+
   const selectedDaySchedules = useMemo(() => {
     if (!selectedDay) return [];
     const key = format(selectedDay, "yyyy-MM-dd");
     return schedulesByDate[key] ?? [];
   }, [selectedDay, schedulesByDate]);
+
+  const selectedDayActual = useMemo(() => {
+    if (!selectedDay) return 0;
+    return actualMinutesByDate[format(selectedDay, "yyyy-MM-dd")] ?? 0;
+  }, [selectedDay, actualMinutesByDate]);
 
   async function handleDelete(id: string) {
     await deleteSchedule(id);
@@ -181,6 +200,7 @@ export default function CalendarPage() {
               }
               const dateStr = format(day, "yyyy-MM-dd");
               const daySchedules = schedulesByDate[dateStr] ?? [];
+              const actualMins = actualMinutesByDate[dateStr] ?? 0;
               const isToday = isSameDay(day, today);
               const isSelected = selectedDay ? isSameDay(day, selectedDay) : false;
               const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -234,6 +254,12 @@ export default function CalendarPage() {
                       </span>
                     )}
                   </div>
+                  {/* 実績あり → 緑チェック */}
+                  {actualMins > 0 && (
+                    <span className="text-[8px] font-bold" style={{ color: "var(--color-brand-green)" }}>
+                      ✓{actualMins}m
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -264,12 +290,16 @@ export default function CalendarPage() {
           }}
         >
           <div className="flex items-center justify-between mb-4">
-            <h3
-              className="font-display font-bold"
-              style={{ color: "var(--color-text-primary)" }}
-            >
-              {format(selectedDay, "M月d日（E）", { locale: ja })}
-            </h3>
+            <div>
+              <h3 className="font-display font-bold" style={{ color: "var(--color-text-primary)" }}>
+                {format(selectedDay, "M月d日（E）", { locale: ja })}
+              </h3>
+              {selectedDayActual > 0 && (
+                <p className="text-xs font-semibold mt-0.5" style={{ color: "var(--color-brand-green)" }}>
+                  ✓ 実績: {selectedDayActual}分勉強した
+                </p>
+              )}
+            </div>
             <Link
               href={`/calendar/new?date=${format(selectedDay, "yyyy-MM-dd")}`}
               className="flex items-center gap-1 text-xs font-semibold"

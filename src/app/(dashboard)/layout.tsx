@@ -5,21 +5,22 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import {
   Home,
-  BookOpen,
+  Timer,
   Calendar,
   Trophy,
   Settings,
   LogOut,
   MessageCircle,
+  Crown,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: Home,          label: "ホーム" },
-  { href: "/tests",     icon: BookOpen,       label: "テスト" },
-  { href: "/calendar",  icon: Calendar,       label: "カレンダー" },
-  { href: "/chat",      icon: MessageCircle,  label: "AI質問" },
-  { href: "/ranking",   icon: Trophy,         label: "ランキング" },
-  { href: "/settings",  icon: Settings,       label: "設定" },
+  { href: "/study",     icon: Timer,         label: "タイマー" },
+  { href: "/calendar",  icon: Calendar,      label: "カレンダー" },
+  { href: "/chat",      icon: MessageCircle, label: "AI質問" },
+  { href: "/ranking",   icon: Trophy,        label: "ランキング" },
+  { href: "/settings",  icon: Settings,      label: "設定" },
 ];
 
 function NavItem({
@@ -119,6 +120,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             />
           ))}
         </nav>
+
+        {/* アップグレードCTA */}
+        <div className="px-3 pb-2">
+          <Link
+            href="/settings/billing"
+            className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5"
+            style={{
+              background: "linear-gradient(135deg, rgba(155,93,229,0.15), rgba(28,176,246,0.15))",
+              border: "1px solid rgba(155,93,229,0.3)",
+              color: "var(--color-brand-purple)",
+            }}
+          >
+            <Crown size={15} />
+            Proにアップグレード
+          </Link>
+        </div>
 
         {/* ユーザー情報 */}
         <div

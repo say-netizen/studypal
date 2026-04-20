@@ -26,11 +26,22 @@ export async function POST(req: NextRequest) {
   const plan = (userSnap.data()?.plan ?? "free") as "free" | "pro" | "family";
   const grade = (userSnap.data()?.grade as string | null) ?? "中2";
 
+  // AI問題生成はPro/Family限定
+  if (plan === "free") {
+    return NextResponse.json(
+      {
+        error: "AI予想問題の生成はProプラン以上でご利用いただけます。",
+        upgradeRequired: true,
+      },
+      { status: 403 }
+    );
+  }
+
   const { allowed, count, limit } = await checkLimit(uid, plan);
   if (!allowed) {
     return NextResponse.json(
       {
-        error: "今月の生成回数の上限に達しました。Proプランにアップグレードすると無制限に使えます。",
+        error: "今月の生成回数の上限に達しました。",
         usageCount: count,
         usageLimit: limit,
         upgradeRequired: true,
