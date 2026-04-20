@@ -2,13 +2,14 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthContext";
 import {
   getTest,
   getTestQuestions,
+  recordStudySession,
   type TestDoc,
   type QuestionDoc,
 } from "@/lib/firebase/schema";
@@ -261,10 +262,14 @@ export default function ResultPage() {
   const { currentUser } = useAuth();
 
   const xpEarned = Number(searchParams.get("xp") ?? 0);
+  const minutesParam = Number(searchParams.get("minutes") ?? 1);
+  const subjectParam = searchParams.get("subject") ?? null;
+
   const [test, setTest] = useState<(TestDoc & { id: string }) | null>(null);
   const [questions, setQuestions] = useState<(QuestionDoc & { id: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [showOnlyWrong, setShowOnlyWrong] = useState(false);
+  const postedRef = useRef(false);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -274,6 +279,32 @@ export default function ResultPage() {
       setLoading(false);
     });
   }, [currentUser, testId]);
+
+  // ランキング更新・ストリーク保存（1回だけ実行）
+  useEffect(() => {
+    if (!currentUser || postedRef.current) return;
+    postedRef.current = true;
+
+    recordStudySession(currentUser.uid).then((newStreak) => {
+      currentUser.getIdToken().then((token) => {
+        const correctCount = questions.filter((q) => q.isCorrect === true).length;
+        fetch("/api/ranking", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            studyMinutes: minutesParam,
+            correctAnswers: correctCount,
+            streakDays: newStreak,
+            subject: subjectParam,
+          }),
+        }).catch(() => {}); // ランキング失敗は無視
+      });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
 
   const answered = questions.filter((q) => q.isCorrect !== null);
   const correct = questions.filter((q) => q.isCorrect === true);

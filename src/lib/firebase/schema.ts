@@ -31,6 +31,7 @@ export interface UserDoc {
   totalXp: number;
   currentLevel: number;
   currentStreak: number;
+  lastStudyDate: string | null; // YYYY-MM-DD
   createdAt: Timestamp;
 }
 
@@ -99,6 +100,27 @@ export async function addXp(uid: string, amount: number): Promise<void> {
   if (!user) return;
   const newXp = user.totalXp + amount;
   await updateDoc(doc(db(), "users", uid), { totalXp: newXp });
+}
+
+/** クイズ完了時に呼ぶ。日次ストリークを更新する */
+export async function recordStudySession(uid: string): Promise<number> {
+  const user = await getUser(uid);
+  if (!user) return 0;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const last = user.lastStudyDate;
+
+  if (last === today) return user.currentStreak; // 今日はすでに記録済み
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const newStreak = last === yesterday ? user.currentStreak + 1 : 1;
+
+  await updateDoc(doc(db(), "users", uid), {
+    currentStreak: newStreak,
+    lastStudyDate: today,
+  });
+
+  return newStreak;
 }
 
 // ─────────────────────────────────────────

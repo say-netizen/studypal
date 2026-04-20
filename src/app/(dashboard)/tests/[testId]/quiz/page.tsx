@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import {
@@ -72,6 +72,8 @@ export default function QuizPage() {
   const [showXpPopup, setShowXpPopup] = useState(false);
   const [xpAmount, setXpAmount] = useState(0);
   const [cardAnim, setCardAnim] = useState<"" | "correct" | "shake">("");
+  const [bestStreak, setBestStreak] = useState(0);
+  const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
     if (!currentUser) return;
@@ -100,6 +102,7 @@ export default function QuizPage() {
       setCardAnim("correct");
       const newStreak = streak + 1;
       setStreak(newStreak);
+      setBestStreak((prev) => Math.max(prev, newStreak));
       const xp = newStreak >= 3 ? 20 : 10;
       setXpAmount(xp);
       setTotalXp((prev) => prev + xp);
@@ -117,7 +120,9 @@ export default function QuizPage() {
 
   function handleNext() {
     if (currentIndex + 1 >= questions.length) {
-      router.push(`/tests/${testId}/result?xp=${totalXp}`);
+      const minutes = Math.max(1, Math.round((Date.now() - startTimeRef.current) / 60000));
+      const subject = encodeURIComponent(test?.subject ?? "");
+      router.push(`/tests/${testId}/result?xp=${totalXp}&streak=${bestStreak}&minutes=${minutes}&subject=${subject}`);
       return;
     } else {
       setCurrentIndex((i) => i + 1);
