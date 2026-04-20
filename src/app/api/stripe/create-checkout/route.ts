@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-03-25.dahlia",
+  apiVersion: "2025-04-30.basil",
 });
 
 // Stripe Price IDs (本番では Stripe ダッシュボードで作成)
@@ -48,11 +48,16 @@ export async function POST(req: NextRequest) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+  const priceId = PRICE_IDS[plan];
+  if (!priceId || priceId.includes("placeholder")) {
+    return NextResponse.json({ error: "Price ID が設定されていません" }, { status: 500 });
+  }
+
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
     payment_method_types: ["card"],
-    line_items: [{ price: PRICE_IDS[plan], quantity: 1 }],
+    line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${appUrl}/dashboard?upgraded=true&plan=${plan}`,
     cancel_url: `${appUrl}/settings/billing`,
     metadata: { firebaseUid: uid, plan },
@@ -63,4 +68,14 @@ export async function POST(req: NextRequest) {
   });
 
   return NextResponse.json({ url: session.url });
+}
+
+export async function GET() {
+  // デバッグ用: 環境変数の確認
+  return NextResponse.json({
+    hasSecretKey: !!process.env.STRIPE_SECRET_KEY,
+    keyPrefix: process.env.STRIPE_SECRET_KEY?.slice(0, 7),
+    proPrice: process.env.STRIPE_PRO_PRICE_ID,
+    familyPrice: process.env.STRIPE_FAMILY_PRICE_ID,
+  });
 }
