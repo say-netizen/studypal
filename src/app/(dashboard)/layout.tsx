@@ -59,8 +59,25 @@ function NavItem({
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { currentUser, logout } = useAuth();
+  const { currentUser, loading, logout } = useAuth();
   const router = useRouter();
+
+  // 未ログインならloginへリダイレクト
+  if (!loading && !currentUser) {
+    router.replace("/login?redirect=" + encodeURIComponent(pathname));
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div
+          className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin"
+          style={{ borderColor: "var(--color-brand-blue)" }}
+        />
+      </div>
+    );
+  }
 
   async function handleLogout() {
     await logout();
