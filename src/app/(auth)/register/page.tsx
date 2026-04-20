@@ -2,12 +2,13 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   updateProfile,
 } from "firebase/auth";
@@ -35,11 +36,24 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function createUserDoc(uid: string, displayName: string, userEmail: string) {
+  // Googleリダイレクト後に戻ってきたときにユーザードキュメントを作成
+  useEffect(() => {
+    getRedirectResult(auth()).then(async (result) => {
+      if (!result) return;
+      const pendingGrade = localStorage.getItem("pending_grade") ?? "";
+      const { uid, displayName, email: userEmail } = result.user;
+      await createUserDoc(uid, displayName ?? "ゲスト", userEmail ?? "", pendingGrade);
+      localStorage.removeItem("pending_grade");
+      router.push("/dashboard");
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function createUserDoc(uid: string, displayName: string, userEmail: string, gradeOverride?: string) {
     await setDoc(doc(db(), "users", uid), {
       name: displayName,
       email: userEmail,
-      grade: grade || null,
+      grade: gradeOverride ?? grade ?? null,
       plan: "free",
       stripeCustomerId: null,
       totalXp: 0,
@@ -57,15 +71,12 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
     try {
-      const result = await signInWithPopup(auth(), googleProvider);
-      const { uid, displayName, email: userEmail } = result.user;
-      await createUserDoc(uid, displayName ?? "ゲスト", userEmail ?? "");
-      router.push("/dashboard");
+      localStorage.setItem("pending_grade", grade);
+      await signInWithRedirect(auth(), googleProvider); // ページ遷移するのでここ以降は実行されない
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? "unknown";
       console.error("Google register error:", code, e);
       setError(`Googleでの登録に失敗しました。(${code})`);
-    } finally {
       setLoading(false);
     }
   }

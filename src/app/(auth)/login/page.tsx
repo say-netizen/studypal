@@ -2,13 +2,13 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 
 export default function LoginPage() {
-  const { signInWithGoogle, signInWithEmail } = useAuth();
+  const { signInWithGoogle, signInWithEmail, currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/dashboard";
@@ -18,17 +18,22 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Googleリダイレクト後にログイン済みになったら自動遷移
+  useEffect(() => {
+    if (!authLoading && currentUser) {
+      router.replace(redirect);
+    }
+  }, [currentUser, authLoading, redirect, router]);
+
   async function handleGoogle() {
     setLoading(true);
     setError("");
     try {
-      await signInWithGoogle();
-      router.push(redirect);
+      await signInWithGoogle(); // リダイレクトするのでここ以降は実行されない
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? "unknown";
       console.error("Google login error:", code, e);
       setError(`Googleログインに失敗しました。(${code})`);
-    } finally {
       setLoading(false);
     }
   }
