@@ -33,9 +33,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "無効なプランです" }, { status: 400 });
     }
 
-    const priceId = plan === "pro"
+    const priceId = (plan === "pro"
       ? process.env.STRIPE_PRO_PRICE_ID
-      : process.env.STRIPE_FAMILY_PRICE_ID;
+      : process.env.STRIPE_FAMILY_PRICE_ID)?.trim();
 
     if (!priceId) {
       return NextResponse.json({ error: `STRIPE_${plan.toUpperCase()}_PRICE_ID が未設定です` }, { status: 500 });
