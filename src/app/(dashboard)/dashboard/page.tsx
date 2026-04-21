@@ -201,7 +201,13 @@ export default function DashboardPage() {
           getSchedulesByDate(currentUser!.uid, today),
         ]);
         setUserData(user);
-        setTests(testList as (TestDoc & { id: string })[]);
+        const seen = new Set<string>();
+        const unique = (testList as (TestDoc & { id: string })[]).filter((t) => {
+          if (seen.has(t.id)) return false;
+          seen.add(t.id);
+          return true;
+        });
+        setTests(unique);
         setSchedules(schedList as (ScheduleDoc & { id: string })[]);
       } finally {
         setLoading(false);

@@ -30,9 +30,9 @@ export function calcLevelProgress(totalXp: number): {
   progress: number;
 } {
   const level = calcLevelFromXp(totalXp);
-  const currentLevelXp = xpRequiredForLevel(level);
+  const currentLevelXp = level === 1 ? 0 : xpRequiredForLevel(level);
   const nextLevelXp = xpRequiredForLevel(level + 1);
-  const currentXp = totalXp - currentLevelXp;
+  const currentXp = Math.max(0, totalXp - currentLevelXp);
   const requiredXp = nextLevelXp - currentLevelXp;
   const progress = currentXp / requiredXp;
 
