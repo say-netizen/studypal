@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         metadata: { firebaseUid: uid },
       });
       customerId = customer.id;
-      await adminDb.collection("users").doc(uid).update({ stripeCustomerId: customerId });
+      await adminDb.collection("users").doc(uid).set({ stripeCustomerId: customerId }, { merge: true });
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://studypal-chi.vercel.app";
