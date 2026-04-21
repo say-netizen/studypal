@@ -92,9 +92,11 @@ export default function BillingPage() {
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else {
+        alert(`エラー: ${data.error ?? "不明なエラー"}`);
       }
-    } catch {
-      alert("チェックアウトの開始に失敗しました");
+    } catch (e) {
+      alert(`チェックアウトの開始に失敗しました: ${e}`);
     } finally {
       setCheckoutLoading(null);
     }
