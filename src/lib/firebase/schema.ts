@@ -44,6 +44,20 @@ export interface UserDoc {
   notifyStreak?: boolean;
   notifyTestReminder?: boolean;
   notifyDailyReminder?: boolean;
+  // 保護者設定
+  parentEmail?: string | null;
+  weeklyReport?: boolean;
+  createdAt: Timestamp;
+}
+
+export interface GoalDoc {
+  userId: string;
+  subject: string;
+  description: string;      // "数学で80点取る"
+  targetScore: number;      // 80
+  testId: string | null;
+  achieved: boolean;
+  achievedAt: Timestamp | null;
   createdAt: Timestamp;
 }
 
@@ -58,6 +72,9 @@ export interface TestDoc {
   subject: string;
   testDate: Timestamp;
   range: string;
+  actualScore?: number | null;
+  maxScore?: number | null;       // 満点（デフォルト100）
+  scoredAt?: Timestamp | null;
   createdAt: Timestamp;
 }
 
@@ -377,4 +394,47 @@ export async function getFollowers(followingId: string): Promise<string[]> {
   const q = query(collection(db(), "follows"), where("followingId", "==", followingId));
   const snap = await getDocs(q);
   return snap.docs.map((d) => (d.data() as FollowDoc).followerId);
+}
+
+// ─────────────────────────────────────────
+// goals
+// ─────────────────────────────────────────
+
+export async function createGoal(data: Omit<GoalDoc, "createdAt" | "achieved" | "achievedAt">) {
+  return addDoc(collection(db(), "goals"), {
+    ...data,
+    achieved: false,
+    achievedAt: null,
+    createdAt: serverTimestamp(),
+  });
+}
+
+export async function getUserGoals(uid: string) {
+  const q = query(
+    collection(db(), "goals"),
+    where("userId", "==", uid),
+    orderBy("createdAt", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => snapToData<GoalDoc>(d));
+}
+
+export async function achieveGoal(goalId: string) {
+  await updateDoc(doc(db(), "goals", goalId), {
+    achieved: true,
+    achievedAt: serverTimestamp(),
+  });
+}
+
+export async function deleteGoal(goalId: string) {
+  await deleteDoc(doc(db(), "goals", goalId));
+}
+
+// テスト得点更新
+export async function recordTestScore(testId: string, actualScore: number, maxScore: number) {
+  await updateDoc(doc(db(), "tests", testId), {
+    actualScore,
+    maxScore,
+    scoredAt: serverTimestamp(),
+  });
 }

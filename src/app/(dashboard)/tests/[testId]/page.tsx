@@ -25,6 +25,7 @@ import {
   Loader2,
   AlertCircle,
   Lock,
+  PenLine,
 } from "lucide-react";
 
 const SUBJECT_COLORS: Record<string, string> = {
@@ -233,6 +234,28 @@ export default function TestDetailPage() {
             </p>
           </div>
         )}
+
+        {/* テスト結果入力ボタン */}
+        <div className="mt-4 pt-4 border-t flex items-center justify-between" style={{ borderColor: "var(--color-bg-tertiary)" }}>
+          {test.actualScore != null ? (
+            <div>
+              <p className="text-xs font-semibold" style={{ color: "var(--color-text-muted)" }}>テスト結果</p>
+              <p className="text-lg font-display font-black" style={{ color: color }}>
+                {test.actualScore} / {test.maxScore ?? 100}点
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>結果未入力</p>
+          )}
+          <Link
+            href={`/tests/${testId}/score`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-pill text-xs font-bold transition-all hover:opacity-80"
+            style={{ background: color + "15", color }}
+          >
+            <PenLine size={13} />
+            結果を入力
+          </Link>
+        </div>
       </div>
 
       {/* 問題生成セクション */}

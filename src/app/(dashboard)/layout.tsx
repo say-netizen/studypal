@@ -12,12 +12,14 @@ import {
   LogOut,
   MessageCircle,
   Crown,
+  Target,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: Home,          label: "ホーム" },
   { href: "/study",     icon: Timer,         label: "タイマー" },
   { href: "/calendar",  icon: Calendar,      label: "カレンダー" },
+  { href: "/goals",     icon: Target,        label: "目標" },
   { href: "/chat",      icon: MessageCircle, label: "AI質問" },
   { href: "/ranking",   icon: Trophy,        label: "ランキング" },
   { href: "/settings",  icon: Settings,      label: "設定" },

@@ -13,9 +13,10 @@ import {
 } from "@/lib/firebase/schema";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Play, Pause, Square, Timer, BookOpen } from "lucide-react";
+import { Play, Pause, Square, Timer, BookOpen, AlarmClock } from "lucide-react";
 
 const SUBJECTS = ["国語", "数学", "英語", "理科", "社会", "その他"];
+const COUNTDOWN_PRESETS = [15, 30, 45, 60, 90];
 
 const SUBJECT_COLORS: Record<string, string> = {
   国語: "#9B5DE5",
@@ -27,6 +28,7 @@ const SUBJECT_COLORS: Record<string, string> = {
 };
 
 type Phase = "idle" | "running" | "paused" | "done";
+type TimerMode = "stopwatch" | "countdown";
 
 function getEncouragement(actual: number, planned: number) {
   if (planned === 0) {
@@ -64,6 +66,9 @@ export default function StudyPage() {
   const [elapsed, setElapsed] = useState(0); // 秒
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{ actual: number; planned: number; subject: string } | null>(null);
+  const [timerMode, setTimerMode] = useState<TimerMode>("stopwatch");
+  const [countdownMinutes, setCountdownMinutes] = useState(30);
+  const countdownTotalRef = useRef<number>(0);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(0);
@@ -79,8 +84,12 @@ export default function StudyPage() {
   }, [currentUser, today]);
 
   const tick = useCallback(() => {
-    // Page Visibility: 実際の経過時間を使う
-    setElapsed(savedElapsedRef.current + Math.floor((Date.now() - startTimeRef.current) / 1000));
+    const newElapsed = savedElapsedRef.current + Math.floor((Date.now() - startTimeRef.current) / 1000);
+    setElapsed(newElapsed);
+    // カウントダウン完了チェック
+    if (countdownTotalRef.current > 0 && newElapsed >= countdownTotalRef.current) {
+      setElapsed(countdownTotalRef.current);
+    }
   }, []);
 
   // Page Visibility API: バックグラウンドでもタイマー継続
@@ -98,6 +107,7 @@ export default function StudyPage() {
   function startTimer() {
     startTimeRef.current = Date.now();
     savedElapsedRef.current = 0;
+    countdownTotalRef.current = timerMode === "countdown" ? countdownMinutes * 60 : 0;
     setPhase("running");
     intervalRef.current = setInterval(tick, 1000);
   }
@@ -119,8 +129,12 @@ export default function StudyPage() {
     setPhase("done");
 
     const finalElapsed = savedElapsedRef.current + (startTimeRef.current > 0 ? Math.floor((Date.now() - startTimeRef.current) / 1000) : 0);
-    const actualMinutes = Math.max(1, Math.round(finalElapsed / 60));
-    const plannedMinutes = selectedSchedule?.duration ?? 0;
+    const actualMinutes = timerMode === "countdown"
+      ? countdownMinutes
+      : Math.max(1, Math.round(finalElapsed / 60));
+    const plannedMinutes = timerMode === "countdown"
+      ? countdownMinutes
+      : (selectedSchedule?.duration ?? 0);
     const finalSubject = selectedSchedule?.subject ?? subject;
     const isScheduled = selectedSchedule !== null;
     // 予定通り: 10pt/分, 予定外: 5pt/分
@@ -166,16 +180,29 @@ export default function StudyPage() {
     setElapsed(0);
     setResult(null);
     setSelectedSchedule(null);
+    countdownTotalRef.current = 0;
   }
 
   useEffect(() => {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, []);
 
+  // カウントダウン完了で自動終了
+  useEffect(() => {
+    if (phase === "running" && countdownTotalRef.current > 0 && elapsed >= countdownTotalRef.current) {
+      stopTimer();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [elapsed, phase]);
+
   const activeSubject = selectedSchedule?.subject ?? subject;
   const color = SUBJECT_COLORS[activeSubject] ?? "var(--color-brand-blue)";
-  const plannedSec = (selectedSchedule?.duration ?? 0) * 60;
+  const plannedSec = timerMode === "countdown"
+    ? countdownMinutes * 60
+    : (selectedSchedule?.duration ?? 0) * 60;
   const progressPct = plannedSec > 0 ? Math.min((elapsed / plannedSec) * 100, 100) : null;
+  const countdownRemaining = timerMode === "countdown" ? Math.max(0, plannedSec - elapsed) : null;
+  const displayTime = countdownRemaining !== null ? countdownRemaining : elapsed;
 
   // ── 完了画面 ──
   if (phase === "done" && result) {
@@ -244,7 +271,7 @@ export default function StudyPage() {
           <div className="flex items-center justify-between pt-1 border-t" style={{ borderColor: "var(--color-bg-tertiary)" }}>
             <span className="text-sm" style={{ color: "var(--color-text-muted)" }}>獲得XP</span>
             <span className="text-sm font-bold" style={{ color: "var(--color-xp-gold)" }}>
-              +{result.actual * (result.planned > 0 ? 10 : 5)} XP ✨
+              +{result.actual * 10} XP ✨
             </span>
           </div>
         </div>
@@ -328,6 +355,69 @@ export default function StudyPage() {
         </div>
       )}
 
+      {/* タイマーモード選択 */}
+      {phase === "idle" && (
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            {(["stopwatch", "countdown"] as TimerMode[]).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setTimerMode(mode)}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                style={{
+                  background: timerMode === mode ? "rgba(28,176,246,0.12)" : "var(--color-bg-primary)",
+                  border: `2px solid ${timerMode === mode ? "var(--color-brand-blue)" : "var(--color-bg-tertiary)"}`,
+                  color: timerMode === mode ? "var(--color-brand-blue)" : "var(--color-text-secondary)",
+                }}
+              >
+                {mode === "stopwatch" ? <Timer size={15} /> : <AlarmClock size={15} />}
+                {mode === "stopwatch" ? "ストップウォッチ" : "カウントダウン"}
+              </button>
+            ))}
+          </div>
+
+          {timerMode === "countdown" && (
+            <div
+              className="rounded-2xl p-4 space-y-3"
+              style={{ background: "var(--color-bg-primary)", border: "1px solid var(--color-bg-tertiary)" }}
+            >
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>
+                集中時間を選ぶ
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {COUNTDOWN_PRESETS.map((min) => (
+                  <button
+                    key={min}
+                    onClick={() => setCountdownMinutes(min)}
+                    className="px-4 py-2 rounded-pill text-sm font-bold transition-all"
+                    style={{
+                      background: countdownMinutes === min ? color : "var(--color-bg-secondary)",
+                      color: countdownMinutes === min ? "#fff" : "var(--color-text-secondary)",
+                      border: `1px solid ${countdownMinutes === min ? "transparent" : "var(--color-bg-tertiary)"}`,
+                    }}
+                  >
+                    {min}分
+                  </button>
+                ))}
+              </div>
+              <input
+                type="range"
+                min="5"
+                max="120"
+                step="5"
+                value={countdownMinutes}
+                onChange={(e) => setCountdownMinutes(Number(e.target.value))}
+                className="w-full"
+                style={{ accentColor: color }}
+              />
+              <p className="text-center font-display font-black text-2xl" style={{ color }}>
+                {countdownMinutes}分集中モード ⏱️
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* タイマー本体 */}
       <div className="flex flex-col items-center gap-6 py-4">
         {/* 円形プログレス */}
@@ -367,14 +457,19 @@ export default function StudyPage() {
             <span
               className="font-mono font-black"
               style={{
-                fontSize: elapsed >= 3600 ? "1.75rem" : "2.5rem",
+                fontSize: displayTime >= 3600 ? "1.75rem" : "2.5rem",
                 color: phase === "idle" ? "var(--color-text-muted)" : color,
                 letterSpacing: "-0.02em",
               }}
             >
-              {formatTime(elapsed)}
+              {formatTime(displayTime)}
             </span>
-            {progressPct !== null && (
+            {timerMode === "countdown" && phase !== "idle" && (
+              <span className="text-xs font-semibold mt-1" style={{ color: "var(--color-text-muted)" }}>
+                残り時間
+              </span>
+            )}
+            {timerMode === "stopwatch" && progressPct !== null && (
               <span className="text-xs font-semibold mt-1" style={{ color: "var(--color-text-muted)" }}>
                 目標 {selectedSchedule!.duration}分
               </span>
