@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import {
   getTest,
   getTestQuestions,
+  getUser,
   type TestDoc,
   type QuestionDoc,
 } from "@/lib/firebase/schema";
@@ -57,6 +58,7 @@ export default function TestDetailPage() {
   const [test, setTest] = useState<(TestDoc & { id: string }) | null>(null);
   const [questions, setQuestions] = useState<(QuestionDoc & { id: string })[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userPlan, setUserPlan] = useState<"free" | "pro" | "family">("free");
   const [genStatus, setGenStatus] = useState<GenerateStatus>("idle");
   const [genError, setGenError] = useState("");
   const [usageInfo, setUsageInfo] = useState<{
@@ -67,12 +69,14 @@ export default function TestDetailPage() {
   async function loadData() {
     if (!currentUser) return;
     try {
-      const [testData, qList] = await Promise.all([
+      const [testData, qList, userData] = await Promise.all([
         getTest(testId),
         getTestQuestions(testId),
+        getUser(currentUser.uid),
       ]);
       setTest(testData as (TestDoc & { id: string }) | null);
       setQuestions(qList as (QuestionDoc & { id: string })[]);
+      setUserPlan(userData?.plan ?? "free");
     } finally {
       setLoading(false);
     }
@@ -255,7 +259,29 @@ export default function TestDetailPage() {
           )}
         </div>
 
-        {questions.length === 0 ? (
+        {/* Freeプランは Pro限定ゲート */}
+        {userPlan === "free" ? (
+          <div className="text-center py-5">
+            <Lock size={36} className="mx-auto mb-3" style={{ color: "var(--color-brand-purple)" }} />
+            <p className="text-sm font-bold mb-1" style={{ color: "var(--color-text-primary)" }}>
+              Pro限定機能です
+            </p>
+            <p className="text-xs mb-4" style={{ color: "var(--color-text-muted)" }}>
+              AI予想問題の生成はProプラン以上でご利用いただけます
+            </p>
+            <Link
+              href="/settings/billing"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-pill font-bold text-white transition-all hover:-translate-y-0.5"
+              style={{
+                background: "linear-gradient(135deg, #9B5DE5, #1CB0F6)",
+                boxShadow: "0 4px 15px rgba(155,93,229,0.35)",
+              }}
+            >
+              <Sparkles size={15} />
+              Proにアップグレード
+            </Link>
+          </div>
+        ) : questions.length === 0 ? (
           <>
             {genStatus === "limit" ? (
               <div className="text-center py-4">

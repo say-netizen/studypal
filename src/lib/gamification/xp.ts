@@ -11,6 +11,27 @@ export const XP_RULES = {
   BADGE_MAX:           200,
 } as const;
 
+// ランキングスコア計算ルール
+export const RANKING_POINTS = {
+  SCHEDULED_STUDY_PER_MIN: 10,  // 予定通りの勉強（カレンダー登録済み）
+  FREE_STUDY_PER_MIN: 5,         // 予定外の勉強
+  STREAK_PER_DAY: 20,            // ストリーク継続
+  TEST_REGISTRATION: 5,          // テスト登録
+} as const;
+
+export function calcRankingPoints(params: {
+  scheduledMinutes: number;
+  freeMinutes: number;
+  streakDays: number;
+  testRegistrations: number;
+}): { total: number; scheduledPts: number; freePts: number; streakPts: number; testPts: number } {
+  const scheduledPts = params.scheduledMinutes * RANKING_POINTS.SCHEDULED_STUDY_PER_MIN;
+  const freePts      = params.freeMinutes * RANKING_POINTS.FREE_STUDY_PER_MIN;
+  const streakPts    = params.streakDays * RANKING_POINTS.STREAK_PER_DAY;
+  const testPts      = params.testRegistrations * RANKING_POINTS.TEST_REGISTRATION;
+  return { total: scheduledPts + freePts + streakPts + testPts, scheduledPts, freePts, streakPts, testPts };
+}
+
 export type XpReason =
   | "correct_answer"
   | "correct_streak_bonus"

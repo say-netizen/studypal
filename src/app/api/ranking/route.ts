@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { calcRankingPoints } from "@/lib/gamification/xp";
 
-/** 今週 (月曜始まり) の ISO 週番号と年を返す */
 function getISOWeek(date: Date): { year: number; week: number } {
   const d = new Date(date);
   const day = d.getUTCDay() === 0 ? 7 : d.getUTCDay();
@@ -56,10 +56,31 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { studyMinutes = 0, correctAnswers = 0, streakDays = 0, subject } = body;
+  const {
+    scheduledMinutes = 0,
+    freeMinutes = 0,
+    streakDays = 0,
+    testRegistrations = 0,
+    subject,
+    // 旧フォーマット互換
+    studyMinutes,
+    isScheduled,
+  } = body;
 
-  // スコア計算: 勉強時間×1pt/分 + 正解×10pt + ストリーク×20pt/日
-  const points = studyMinutes * 1 + correctAnswers * 10 + streakDays * 20;
+  // 旧フォーマット（studyMinutes + isScheduled）対応
+  const finalScheduled = studyMinutes !== undefined
+    ? (isScheduled ? studyMinutes : 0)
+    : scheduledMinutes;
+  const finalFree = studyMinutes !== undefined
+    ? (isScheduled ? 0 : studyMinutes)
+    : freeMinutes;
+
+  const { total, scheduledPts, freePts, streakPts, testPts } = calcRankingPoints({
+    scheduledMinutes: finalScheduled,
+    freeMinutes: finalFree,
+    streakDays,
+    testRegistrations,
+  });
 
   const userSnap = await adminDb.collection("users").doc(uid).get();
   const nickname = userSnap.data()?.name ?? "匿名ユーザー";
@@ -69,11 +90,14 @@ export async function POST(req: NextRequest) {
     nickname,
     level,
     subject: subject ?? null,
-    score: FieldValue.increment(points),
+    score: FieldValue.increment(total),
+    scheduledPts: FieldValue.increment(scheduledPts),
+    freePts: FieldValue.increment(freePts),
+    streakPts: FieldValue.increment(streakPts),
+    testPts: FieldValue.increment(testPts),
     updatedAt: FieldValue.serverTimestamp(),
   };
 
-  // 週次・月次 両方更新
   const { year, week } = getISOWeek(new Date());
   const weeklyPath = `rankings/weekly_${year}_${String(week).padStart(2, "0")}/entries`;
   const monthlyPath = `rankings/monthly_${currentMonth()}/entries`;
@@ -83,5 +107,5 @@ export async function POST(req: NextRequest) {
     adminDb.collection(monthlyPath).doc(uid).set(entry, { merge: true }),
   ]);
 
-  return NextResponse.json({ ok: true, points });
+  return NextResponse.json({ ok: true, points: total, breakdown: { scheduledPts, freePts, streakPts, testPts } });
 }

@@ -66,6 +66,8 @@ export default function StudyPage() {
   const [result, setResult] = useState<{ actual: number; planned: number; subject: string } | null>(null);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const savedElapsedRef = useRef<number>(0);
 
   // 今日の勉強スケジュールを取得
   useEffect(() => {
@@ -76,30 +78,53 @@ export default function StudyPage() {
     });
   }, [currentUser, today]);
 
-  const tick = useCallback(() => setElapsed((e) => e + 1), []);
+  const tick = useCallback(() => {
+    // Page Visibility: 実際の経過時間を使う
+    setElapsed(savedElapsedRef.current + Math.floor((Date.now() - startTimeRef.current) / 1000));
+  }, []);
+
+  // Page Visibility API: バックグラウンドでもタイマー継続
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible" && intervalRef.current !== null) {
+        // フォアグラウンドに戻ったら表示を即時更新
+        tick();
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [tick]);
 
   function startTimer() {
+    startTimeRef.current = Date.now();
+    savedElapsedRef.current = 0;
     setPhase("running");
     intervalRef.current = setInterval(tick, 1000);
   }
 
   function pauseTimer() {
+    savedElapsedRef.current = elapsed;
     setPhase("paused");
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
   }
 
   function resumeTimer() {
+    startTimeRef.current = Date.now();
     setPhase("running");
     intervalRef.current = setInterval(tick, 1000);
   }
 
   async function stopTimer() {
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
     setPhase("done");
 
-    const actualMinutes = Math.max(1, Math.round(elapsed / 60));
+    const finalElapsed = savedElapsedRef.current + (startTimeRef.current > 0 ? Math.floor((Date.now() - startTimeRef.current) / 1000) : 0);
+    const actualMinutes = Math.max(1, Math.round(finalElapsed / 60));
     const plannedMinutes = selectedSchedule?.duration ?? 0;
     const finalSubject = selectedSchedule?.subject ?? subject;
+    const isScheduled = selectedSchedule !== null;
+    // 予定通り: 10pt/分, 予定外: 5pt/分
+    const xpGained = actualMinutes * (isScheduled ? 10 : 5);
 
     setSaving(true);
     try {
@@ -112,16 +137,21 @@ export default function StudyPage() {
           scheduleId: selectedSchedule?.id ?? null,
           date: today,
         });
-        await recordStudySession(currentUser.uid);
-        // 勉強時間に応じてXP付与 (1分 = 1XP)
-        await addXp(currentUser.uid, actualMinutes);
+        const newStreak = await recordStudySession(currentUser.uid);
+        await addXp(currentUser.uid, xpGained);
 
-        // ランキング更新
+        // ランキング更新（新スコア形式）
         const token = await currentUser.getIdToken();
         await fetch("/api/ranking", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ studyMinutes: actualMinutes, correctAnswers: 0, streakDays: 0, subject: finalSubject }),
+          body: JSON.stringify({
+            scheduledMinutes: isScheduled ? actualMinutes : 0,
+            freeMinutes: isScheduled ? 0 : actualMinutes,
+            streakDays: newStreak > 0 ? 1 : 0,
+            testRegistrations: 0,
+            subject: finalSubject,
+          }),
         });
       }
     } finally {
@@ -213,7 +243,9 @@ export default function StudyPage() {
           )}
           <div className="flex items-center justify-between pt-1 border-t" style={{ borderColor: "var(--color-bg-tertiary)" }}>
             <span className="text-sm" style={{ color: "var(--color-text-muted)" }}>獲得XP</span>
-            <span className="text-sm font-bold" style={{ color: "var(--color-xp-gold)" }}>+{result.actual} XP ✨</span>
+            <span className="text-sm font-bold" style={{ color: "var(--color-xp-gold)" }}>
+              +{result.actual * (result.planned > 0 ? 10 : 5)} XP ✨
+            </span>
           </div>
         </div>
 

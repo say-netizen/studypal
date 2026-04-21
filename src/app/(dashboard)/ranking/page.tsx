@@ -2,9 +2,11 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { Trophy, Medal } from "lucide-react";
+import { Trophy, Medal, Users } from "lucide-react";
+import { FollowButton } from "@/components/social/FollowButton";
+import Link from "next/link";
 
 type RankEntry = {
   uid: string;
@@ -12,19 +14,19 @@ type RankEntry = {
   level: number;
   score: number;
   subject?: string | null;
+  scheduledPts?: number;
+  freePts?: number;
+  streakPts?: number;
+  testPts?: number;
 };
 
 type Period = "weekly" | "monthly";
 type SubjectFilter = "all" | "国語" | "数学" | "英語" | "理科" | "社会";
+type ListMode = "all" | "following";
 
 const SUBJECTS: SubjectFilter[] = ["all", "国語", "数学", "英語", "理科", "社会"];
 const SUBJECT_LABELS: Record<SubjectFilter, string> = {
-  all: "総合",
-  国語: "国語",
-  数学: "数学",
-  英語: "英語",
-  理科: "理科",
-  社会: "社会",
+  all: "総合", 国語: "国語", 数学: "数学", 英語: "英語", 理科: "理科", 社会: "社会",
 };
 
 function RankBadge({ rank }: { rank: number }) {
@@ -41,22 +43,67 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
+function ScoreBreakdown({ entry }: { entry: RankEntry }) {
+  const items = [
+    { icon: "📅", label: "予定通り勉強", pts: entry.scheduledPts ?? 0 },
+    { icon: "⚡", label: "ストリーク", pts: entry.streakPts ?? 0 },
+    { icon: "📝", label: "テスト登録", pts: entry.testPts ?? 0 },
+    { icon: "📖", label: "自由学習", pts: entry.freePts ?? 0 },
+  ].filter((i) => i.pts > 0);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div
+      className="mt-3 p-3 rounded-xl space-y-1"
+      style={{ background: "rgba(28,176,246,0.06)", border: "1px solid rgba(28,176,246,0.12)" }}
+    >
+      <p className="text-xs font-bold mb-2" style={{ color: "var(--color-brand-blue)" }}>
+        スコア内訳
+      </p>
+      {items.map((item) => (
+        <div key={item.label} className="flex justify-between text-xs">
+          <span style={{ color: "var(--color-text-secondary)" }}>
+            {item.icon} {item.label}
+          </span>
+          <span className="font-semibold" style={{ color: "var(--color-brand-blue)" }}>
+            {item.pts.toLocaleString()}pt
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function RankingPage() {
   const { currentUser } = useAuth();
   const [period, setPeriod] = useState<Period>("weekly");
   const [subject, setSubject] = useState<SubjectFilter>("all");
+  const [listMode, setListMode] = useState<ListMode>("all");
   const [entries, setEntries] = useState<RankEntry[]>([]);
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [myRank, setMyRank] = useState<number | null>(null);
+  const [showMyBreakdown, setShowMyBreakdown] = useState(false);
 
-  async function loadRanking() {
+  const loadFollowing = useCallback(async () => {
+    if (!currentUser) return;
+    const res = await fetch(`/api/follows?uid=${currentUser.uid}&type=following`);
+    const data = await res.json();
+    setFollowingIds(new Set((data.users ?? []).map((u: { uid: string }) => u.uid)));
+  }, [currentUser]);
+
+  const loadRanking = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ period });
       if (subject !== "all") params.set("subject", subject);
       const res = await fetch(`/api/ranking?${params}`);
       const data = await res.json();
-      const list: RankEntry[] = data.entries ?? [];
+      let list: RankEntry[] = data.entries ?? [];
+      if (listMode === "following") {
+        list = list.filter((e) => followingIds.has(e.uid) || e.uid === currentUser?.uid);
+      }
       setEntries(list);
       if (currentUser) {
         const idx = list.findIndex((e) => e.uid === currentUser.uid);
@@ -65,12 +112,17 @@ export default function RankingPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [period, subject, listMode, followingIds, currentUser]);
+
+  useEffect(() => {
+    loadFollowing();
+  }, [loadFollowing]);
 
   useEffect(() => {
     loadRanking();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period, subject, currentUser]);
+  }, [loadRanking]);
+
+  const myEntry = entries.find((e) => e.uid === currentUser?.uid);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
@@ -83,37 +135,60 @@ export default function RankingPage() {
       </div>
 
       {/* 自分の順位ハイライト */}
-      {myRank !== null && !loading && (
+      {myRank !== null && !loading && myEntry && (
         <div
-          className="flex items-center gap-4 p-4 rounded-2xl"
+          className="p-4 rounded-2xl cursor-pointer"
           style={{
             background: "linear-gradient(135deg, rgba(28,176,246,0.1), rgba(155,93,229,0.1))",
             border: "1px solid rgba(28,176,246,0.25)",
           }}
+          onClick={() => setShowMyBreakdown((v) => !v)}
         >
-          <Medal size={20} style={{ color: "var(--color-brand-blue)" }} />
-          <div>
-            <p className="font-bold text-sm" style={{ color: "var(--color-text-primary)" }}>
-              あなたの順位
-            </p>
-            <p className="text-2xl font-display font-black" style={{ color: "var(--color-brand-blue)" }}>
-              {myRank}位
-            </p>
+          <div className="flex items-center gap-4">
+            <Medal size={20} style={{ color: "var(--color-brand-blue)" }} />
+            <div>
+              <p className="font-bold text-sm" style={{ color: "var(--color-text-primary)" }}>
+                あなたの順位
+              </p>
+              <p className="text-2xl font-display font-black" style={{ color: "var(--color-brand-blue)" }}>
+                {myRank}位
+              </p>
+            </div>
+            <div className="ml-auto text-right">
+              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>スコア</p>
+              <p className="font-bold text-lg" style={{ color: "var(--color-text-primary)" }}>
+                {myEntry.score?.toLocaleString() ?? 0}pt
+              </p>
+            </div>
           </div>
-          <div className="ml-auto text-right">
-            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>スコア</p>
-            <p className="font-bold text-lg" style={{ color: "var(--color-text-primary)" }}>
-              {entries[myRank - 1]?.score?.toLocaleString() ?? 0}pt
-            </p>
-          </div>
+          {showMyBreakdown && <ScoreBreakdown entry={myEntry} />}
+          <p className="text-xs mt-2 text-center" style={{ color: "var(--color-text-muted)" }}>
+            {showMyBreakdown ? "▲ 閉じる" : "▼ スコア内訳を見る"}
+          </p>
         </div>
       )}
 
+      {/* タブ: 表示モード */}
+      <div className="flex rounded-xl p-1" style={{ background: "var(--color-bg-tertiary)" }}>
+        {([["all", "全体"], ["following", "フォロー中"]] as [ListMode, string][]).map(([m, label]) => (
+          <button
+            key={m}
+            onClick={() => setListMode(m)}
+            className="flex-1 py-2 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5"
+            style={{
+              background: listMode === m ? "var(--color-bg-primary)" : "transparent",
+              color: listMode === m ? "var(--color-text-primary)" : "var(--color-text-muted)",
+              boxShadow: listMode === m ? "var(--shadow-sm)" : "none",
+            }}
+          >
+            {m === "following" && <Users size={13} />}
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* タブ: 期間 */}
-      <div
-        className="flex rounded-xl p-1"
-        style={{ background: "var(--color-bg-tertiary)" }}
-      >
+      <div className="flex rounded-xl p-1" style={{ background: "var(--color-bg-tertiary)" }}>
         {(["weekly", "monthly"] as Period[]).map((p) => (
           <button
             key={p}
@@ -138,8 +213,7 @@ export default function RankingPage() {
             onClick={() => setSubject(s)}
             className="flex-shrink-0 px-3.5 py-1.5 rounded-pill text-xs font-semibold transition-all"
             style={{
-              background:
-                subject === s ? "var(--color-brand-blue)" : "rgba(28,176,246,0.1)",
+              background: subject === s ? "var(--color-brand-blue)" : "rgba(28,176,246,0.1)",
               color: subject === s ? "#fff" : "var(--color-brand-blue)",
             }}
           >
@@ -166,22 +240,23 @@ export default function RankingPage() {
           </div>
         ) : entries.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-4xl mb-3">🏆</p>
+            <p className="text-4xl mb-3">{listMode === "following" ? "👥" : "🏆"}</p>
             <p className="font-bold" style={{ color: "var(--color-text-primary)" }}>
-              まだランキングデータがありません
+              {listMode === "following" ? "フォロー中のユーザーがいません" : "まだランキングデータがありません"}
             </p>
             <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
-              問題を解いてスコアを獲得しよう！
+              {listMode === "following" ? "友達をフォローしよう！" : "勉強してスコアを獲得しよう！"}
             </p>
           </div>
         ) : (
           entries.slice(0, 50).map((entry, idx) => {
             const rank = idx + 1;
             const isMe = entry.uid === currentUser?.uid;
+            const isFollowingUser = followingIds.has(entry.uid);
             return (
               <div
                 key={entry.uid}
-                className="flex items-center gap-3 px-4 py-3.5 border-b last:border-b-0 transition-colors"
+                className="flex items-center gap-3 px-4 py-3.5 border-b last:border-b-0"
                 style={{
                   borderColor: "var(--color-bg-tertiary)",
                   background: isMe
@@ -195,37 +270,27 @@ export default function RankingPage() {
                   <RankBadge rank={rank} />
                 </div>
 
-                {/* アバター */}
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                  style={{
-                    background:
-                      rank === 1
-                        ? "var(--color-xp-gold)"
-                        : rank === 2
-                        ? "#C0C0C0"
-                        : rank === 3
-                        ? "#CD7F32"
-                        : isMe
-                        ? "var(--color-brand-blue)"
+                <Link href={`/profile/${entry.uid}`}>
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                    style={{
+                      background:
+                        rank === 1 ? "var(--color-xp-gold)"
+                        : rank === 2 ? "#C0C0C0"
+                        : rank === 3 ? "#CD7F32"
+                        : isMe ? "var(--color-brand-blue)"
                         : "var(--color-bg-tertiary)",
-                    color:
-                      rank <= 3 || isMe
-                        ? "#fff"
-                        : "var(--color-text-secondary)",
-                  }}
-                >
-                  {entry.nickname[0]?.toUpperCase() ?? "?"}
-                </div>
+                      color: rank <= 3 || isMe ? "#fff" : "var(--color-text-secondary)",
+                    }}
+                  >
+                    {entry.nickname[0]?.toUpperCase() ?? "?"}
+                  </div>
+                </Link>
 
                 <div className="flex-1 min-w-0">
                   <p
                     className="font-semibold text-sm truncate"
-                    style={{
-                      color: isMe
-                        ? "var(--color-brand-blue)"
-                        : "var(--color-text-primary)",
-                    }}
+                    style={{ color: isMe ? "var(--color-brand-blue)" : "var(--color-text-primary)" }}
                   >
                     {entry.nickname}
                     {isMe && (
@@ -242,23 +307,34 @@ export default function RankingPage() {
                   </p>
                 </div>
 
-                <div className="text-right flex-shrink-0">
-                  <p
-                    className="font-black font-display text-base"
-                    style={{
-                      color:
-                        rank === 1
-                          ? "var(--color-xp-gold)"
-                          : isMe
-                          ? "var(--color-brand-blue)"
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  {!isMe && (
+                    <FollowButton
+                      targetUid={entry.uid}
+                      initialFollowing={isFollowingUser}
+                      size="sm"
+                      onToggle={(f) => {
+                        setFollowingIds((prev) => {
+                          const next = new Set(prev);
+                          if (f) { next.add(entry.uid); } else { next.delete(entry.uid); }
+                          return next;
+                        });
+                      }}
+                    />
+                  )}
+                  <div className="text-right">
+                    <p
+                      className="font-black font-display text-base"
+                      style={{
+                        color: rank === 1 ? "var(--color-xp-gold)"
+                          : isMe ? "var(--color-brand-blue)"
                           : "var(--color-text-primary)",
-                    }}
-                  >
-                    {entry.score?.toLocaleString() ?? 0}
-                  </p>
-                  <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                    pt
-                  </p>
+                      }}
+                    >
+                      {entry.score?.toLocaleString() ?? 0}
+                    </p>
+                    <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>pt</p>
+                  </div>
                 </div>
               </div>
             );
@@ -266,7 +342,7 @@ export default function RankingPage() {
         )}
       </div>
 
-      {/* スコアの説明 */}
+      {/* スコアの計算方法 */}
       <div
         className="rounded-2xl p-4"
         style={{ background: "rgba(28,176,246,0.06)", border: "1px solid rgba(28,176,246,0.15)" }}
@@ -276,9 +352,10 @@ export default function RankingPage() {
         </p>
         <div className="space-y-1">
           {[
-            { label: "勉強時間", value: "1pt / 分" },
-            { label: "問題正解", value: "10pt / 問" },
-            { label: "ストリーク", value: "20pt / 日" },
+            { label: "📅 予定通り勉強", value: "10pt / 分" },
+            { label: "📖 自由学習", value: "5pt / 分" },
+            { label: "⚡ ストリーク継続", value: "20pt / 日" },
+            { label: "📝 テスト登録", value: "5pt / 件" },
           ].map((item) => (
             <div key={item.label} className="flex justify-between text-xs">
               <span style={{ color: "var(--color-text-secondary)" }}>{item.label}</span>

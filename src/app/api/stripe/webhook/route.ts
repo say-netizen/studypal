@@ -2,15 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { adminDb } from "@/lib/firebase/admin";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-03-25.dahlia",
-});
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error("STRIPE_SECRET_KEY is not set");
+  return new Stripe(key, {
+    apiVersion: "2026-03-25.dahlia",
+    httpClient: Stripe.createFetchHttpClient(),
+  });
+}
+
+async function updateUserPlan(uid: string, plan: string) {
+  if (!uid) return;
+  await adminDb.collection("users").doc(uid).set({ plan }, { merge: true });
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+  if (!webhookSecret) {
+    console.error("STRIPE_WEBHOOK_SECRET is not set");
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
+  }
+
+  const stripe = getStripe();
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, sig!, webhookSecret);
@@ -19,59 +35,37 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  async function updateUserPlan(metadata: Stripe.Metadata, plan: string) {
-    const uid = metadata.firebaseUid;
-    if (!uid) return;
-    await adminDb.collection("users").doc(uid).update({ plan });
-  }
-
-  switch (event.type) {
-    case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
-      if (session.mode === "subscription" && session.metadata) {
-        const plan = session.metadata.plan ?? "pro";
-        await updateUserPlan(session.metadata, plan);
-      }
-      break;
-    }
-
-    case "customer.subscription.created":
-    case "customer.subscription.updated": {
-      const sub = event.data.object as Stripe.Subscription;
-      const plan = (sub.metadata?.plan ?? "pro") as string;
-      if (sub.status === "active" || sub.status === "trialing") {
-        await updateUserPlan(sub.metadata, plan);
-      } else if (sub.status === "canceled" || sub.status === "unpaid") {
-        await updateUserPlan(sub.metadata, "free");
-      }
-      break;
-    }
-
-    case "customer.subscription.deleted": {
-      const sub = event.data.object as Stripe.Subscription;
-      await updateUserPlan(sub.metadata, "free");
-      break;
-    }
-
-    case "invoice.paid": {
-      // サブスクリプション継続確認 — 必要に応じて更新ログを記録
-      const invoice = event.data.object as Stripe.Invoice;
-      const subId = (invoice as Stripe.Invoice & { subscription?: string }).subscription;
-      if (subId) {
-        const sub = await stripe.subscriptions.retrieve(subId);
-        const plan = (sub.metadata?.plan ?? "pro") as string;
-        if (sub.status === "active") {
-          await updateUserPlan(sub.metadata, plan);
+  try {
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.mode === "subscription" && session.metadata?.firebaseUid) {
+          await updateUserPlan(session.metadata.firebaseUid, session.metadata.plan ?? "pro");
         }
+        break;
       }
-      break;
+      case "customer.subscription.created":
+      case "customer.subscription.updated": {
+        const sub = event.data.object as Stripe.Subscription;
+        const uid = sub.metadata?.firebaseUid;
+        if (!uid) break;
+        const plan = sub.metadata?.plan ?? "pro";
+        if (sub.status === "active" || sub.status === "trialing") {
+          await updateUserPlan(uid, plan);
+        } else if (sub.status === "canceled" || sub.status === "unpaid") {
+          await updateUserPlan(uid, "free");
+        }
+        break;
+      }
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as Stripe.Subscription;
+        if (sub.metadata?.firebaseUid) await updateUserPlan(sub.metadata.firebaseUid, "free");
+        break;
+      }
     }
-
-    case "invoice.payment_failed": {
-      // 支払い失敗 — 必要に応じてメール通知等
-      console.warn("Invoice payment failed:", event.data.object);
-      break;
-    }
+  } catch (err) {
+    console.error("Webhook handler error:", err);
+    return NextResponse.json({ error: "Handler failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

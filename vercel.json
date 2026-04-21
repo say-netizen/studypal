@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/reminders?mode=evening",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/reminders?mode=morning",
+      "schedule": "0 23 * * *"
+    }
+  ]
+}

@@ -32,6 +32,24 @@ export interface UserDoc {
   currentLevel: number;
   currentStreak: number;
   lastStudyDate: string | null; // YYYY-MM-DD
+  // アバター
+  avatarType?: "photo" | "emoji" | "default";
+  avatarUrl?: string | null;
+  avatarEmoji?: string | null;
+  avatarColor?: string | null;
+  // 通知設定
+  fcmToken?: string | null;
+  notificationsEnabled?: boolean;
+  reminderHour?: number; // 0-23
+  notifyStreak?: boolean;
+  notifyTestReminder?: boolean;
+  notifyDailyReminder?: boolean;
+  createdAt: Timestamp;
+}
+
+export interface FollowDoc {
+  followerId: string;
+  followingId: string;
   createdAt: Timestamp;
 }
 
@@ -314,4 +332,49 @@ export async function getWeeklyRanking(
   );
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ uid: d.id, ...(d.data() as RankingEntry) }));
+}
+
+// ─────────────────────────────────────────
+// follows
+// ─────────────────────────────────────────
+
+export async function followUser(followerId: string, followingId: string): Promise<string> {
+  const ref = await addDoc(collection(db(), "follows"), {
+    followerId,
+    followingId,
+    createdAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+export async function unfollowUser(followerId: string, followingId: string): Promise<void> {
+  const q = query(
+    collection(db(), "follows"),
+    where("followerId", "==", followerId),
+    where("followingId", "==", followingId)
+  );
+  const snap = await getDocs(q);
+  await Promise.all(snap.docs.map((d) => deleteDoc(doc(db(), "follows", d.id))));
+}
+
+export async function isFollowing(followerId: string, followingId: string): Promise<boolean> {
+  const q = query(
+    collection(db(), "follows"),
+    where("followerId", "==", followerId),
+    where("followingId", "==", followingId)
+  );
+  const snap = await getDocs(q);
+  return !snap.empty;
+}
+
+export async function getFollowing(followerId: string): Promise<string[]> {
+  const q = query(collection(db(), "follows"), where("followerId", "==", followerId));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => (d.data() as FollowDoc).followingId);
+}
+
+export async function getFollowers(followingId: string): Promise<string[]> {
+  const q = query(collection(db(), "follows"), where("followingId", "==", followingId));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => (d.data() as FollowDoc).followerId);
 }

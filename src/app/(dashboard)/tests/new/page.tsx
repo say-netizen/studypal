@@ -89,6 +89,15 @@ export default function NewTestPage() {
         // @ts-expect-error schema拡張フィールド
         attachments: fileUrls,
       });
+
+      // テスト登録でランキング +5pt
+      const token = await currentUser.getIdToken();
+      await fetch("/api/ranking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ testRegistrations: 1, subject }),
+      }).catch(() => {});
+
       router.push(`/tests/${docRef.id}`);
     } catch (err) {
       console.error(err);
