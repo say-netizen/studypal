@@ -144,7 +144,7 @@ export async function upsertUser(uid: string, data: Partial<UserDoc>) {
 export async function addXp(uid: string, amount: number): Promise<void> {
   const user = await getUser(uid);
   if (!user) return;
-  const newXp = user.totalXp + amount;
+  const newXp = (user.totalXp ?? 0) + amount;
   await updateDoc(doc(db(), "users", uid), { totalXp: newXp });
 }
 
@@ -437,4 +437,49 @@ export async function recordTestScore(testId: string, actualScore: number, maxSc
     maxScore,
     scoredAt: serverTimestamp(),
   });
+}
+
+// ─────────────────────────────────────────
+// weeklyReports — weeklyReports/{uid}_{YYYY-WNN}
+// ─────────────────────────────────────────
+
+export interface WeeklyReportDoc {
+  uid: string;
+  weekStr: string;        // "2026-W16"
+  periodStart: string;    // YYYY-MM-DD
+  periodEnd: string;      // YYYY-MM-DD
+  childName: string;
+  scheduledRate: number;
+  freeCount: number;
+  streak: number;
+  testCount: number;
+  autonomyScore: number;
+  testStatuses: { subject: string; daysLeft: number; label: string }[];
+  completedTests: { subject: string; date: string; actualScore: number; maxScore: number }[];
+  goals: { description: string; targetScore: number }[];
+  aiComment: string;
+  savedAt: Timestamp;
+}
+
+export async function saveWeeklyReport(
+  uid: string,
+  weekStr: string,
+  data: Omit<WeeklyReportDoc, "savedAt">
+) {
+  await setDoc(
+    doc(db(), "weeklyReports", `${uid}_${weekStr}`),
+    { ...data, savedAt: serverTimestamp() },
+    { merge: false }
+  );
+}
+
+export async function getWeeklyReports(uid: string, limitCount = 12) {
+  const q = query(
+    collection(db(), "weeklyReports"),
+    where("uid", "==", uid),
+    orderBy("periodStart", "desc"),
+    limit(limitCount)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => snapToData<WeeklyReportDoc>(d));
 }

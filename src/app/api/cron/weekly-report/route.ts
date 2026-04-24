@@ -3,39 +3,31 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import { adminDb } from "@/lib/firebase/admin";
 import { Resend } from "resend";
-import { differenceInDays } from "date-fns";
-import { Timestamp } from "firebase-admin/firestore";
+import { generateWeeklyReportForUser, type ReportPayload } from "@/lib/reports/generator";
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "StudyPal <noreply@studypal.app>";
 
-function getTestPrepLabel(sessionCount: number, daysLeft: number): string {
-  if (sessionCount === 0) return "😟 まだ何もしてない";
-  if (sessionCount >= 3 || daysLeft > 3) return "💪 準備OK";
-  return "📖 準備中";
-}
-
-function buildEmailHtml(params: {
-  childName: string;
-  scheduledRate: number;
-  freeCount: number;
-  streak: number;
-  testCount: number;
-  autonomyScore: number;
-  testStatuses: { subject: string; daysLeft: number; label: string }[];
-  goals: { description: string; targetScore: number }[];
-}) {
-  const { childName, scheduledRate, freeCount, streak, testCount, autonomyScore, testStatuses, goals } = params;
+function buildEmailHtml(report: ReportPayload): string {
+  const { childName, scheduledRate, freeCount, streak, testCount, autonomyScore, testStatuses, completedTests, goals, aiComment } = report;
 
   return `<!DOCTYPE html>
 <html lang="ja">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:#F7F7F8;padding:20px;margin:0">
 <div style="max-width:500px;margin:0 auto">
+
   <!-- ヘッダー -->
   <div style="background:linear-gradient(135deg,#58CC02,#1CB0F6);border-radius:20px;padding:28px;text-align:center;margin-bottom:16px">
     <p style="color:rgba(255,255,255,0.8);font-size:13px;margin:0 0 4px">今週の学習レポート</p>
     <h1 style="color:#fff;font-size:22px;font-weight:900;margin:0">${childName}さんのレポート 📊</h1>
   </div>
+
+  <!-- AIコメント -->
+  ${aiComment ? `
+  <div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:12px;border:1px solid rgba(28,176,246,0.2)">
+    <p style="font-size:12px;color:#1CB0F6;font-weight:700;margin:0 0 8px">✨ AIアシスタントからのコメント</p>
+    <p style="font-size:13px;color:#1A1A1A;line-height:1.7;margin:0">${aiComment}</p>
+  </div>` : ""}
 
   <!-- 自主性スコア -->
   <div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:12px;border:2px solid rgba(88,204,2,0.2)">
@@ -66,6 +58,23 @@ function buildEmailHtml(params: {
       <p style="font-size:20px;font-weight:900;color:#1A1A1A;margin:0">${item.value}</p>
     </div>`).join("")}
   </div>
+
+  ${completedTests.length > 0 ? `
+  <!-- テスト結果 -->
+  <div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:12px">
+    <p style="font-size:13px;font-weight:700;color:#1A1A1A;margin:0 0 12px">📋 最近のテスト結果</p>
+    ${completedTests.map((t) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #EFEFEF">
+      <div>
+        <p style="font-size:13px;font-weight:600;color:#1A1A1A;margin:0">${t.subject}</p>
+        <p style="font-size:11px;color:#9CA3AF;margin:0">${t.date}</p>
+      </div>
+      <div style="text-align:right">
+        <p style="font-size:16px;font-weight:900;color:${Math.round(t.actualScore / t.maxScore * 100) >= 80 ? '#58CC02' : Math.round(t.actualScore / t.maxScore * 100) >= 60 ? '#FF9600' : '#FF4B4B'};margin:0">${t.actualScore}点</p>
+        <p style="font-size:11px;color:#9CA3AF;margin:0">${Math.round(t.actualScore / t.maxScore * 100)}%</p>
+      </div>
+    </div>`).join("")}
+  </div>` : ""}
 
   ${testStatuses.length > 0 ? `
   <!-- テスト準備 -->
@@ -109,13 +118,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const today = new Date();
-  const weekAgo = new Date(today);
-  weekAgo.setDate(weekAgo.getDate() - 6);
-  const weekAgoStr = weekAgo.toISOString().slice(0, 10);
-  const todayStr = today.toISOString().slice(0, 10);
-
-  // FamilyプランでparentEmailがあり、weeklyReportを無効にしていないユーザーのみ
+  // FamilyプランでparentEmailがあり、weeklyReportを無効にしていないユーザー
   const usersSnap = await adminDb.collection("users")
     .where("plan", "==", "family")
     .where("parentEmail", "!=", null)
@@ -130,70 +133,32 @@ export async function GET(req: NextRequest) {
     if (data.weeklyReport === false) continue;
 
     const uid = userDoc.id;
-    const childName: string = data.name ?? "お子さん";
 
-    // studySessions 取得
-    const sessionsSnap = await adminDb.collection("studySessions")
-      .where("userId", "==", uid)
-      .where("date", ">=", weekAgoStr)
-      .where("date", "<=", todayStr)
-      .get();
-
-    const sessions = sessionsSnap.docs.map((d) => d.data());
-    const totalCount = sessions.length;
-    const scheduledCount = sessions.filter((s) => s.scheduleId !== null).length;
-    const freeCount = sessions.filter((s) => s.scheduleId === null).length;
-    const scheduledRate = totalCount > 0 ? Math.round((scheduledCount / totalCount) * 100) : 0;
-    const streak: number = data.currentStreak ?? 0;
-
-    // テスト取得
-    const testsSnap = await adminDb.collection("tests")
-      .where("userId", "==", uid)
-      .where("testDate", ">=", Timestamp.fromDate(today))
-      .orderBy("testDate", "asc")
-      .limit(4)
-      .get();
-
-    const testStatuses: { subject: string; daysLeft: number; label: string }[] = [];
-    for (const testDoc of testsSnap.docs) {
-      const t = testDoc.data();
-      const daysLeft = differenceInDays((t.testDate as Timestamp).toDate(), today);
-      const subjSessions = sessions.filter((s) => s.subject === t.subject);
-      testStatuses.push({
-        subject: t.subject,
-        daysLeft,
-        label: getTestPrepLabel(subjSessions.length, daysLeft),
-      });
+    let report: ReportPayload;
+    try {
+      report = await generateWeeklyReportForUser(uid);
+    } catch (e) {
+      console.error("Report generation error:", uid, e);
+      continue;
     }
 
-    // 目標
-    const goalsSnap = await adminDb.collection("goals")
-      .where("userId", "==", uid)
-      .where("achieved", "==", false)
-      .limit(3)
-      .get();
-    const goals = goalsSnap.docs.map((d) => d.data() as { description: string; targetScore: number });
+    // Firestoreにスナップショット保存
+    try {
+      await adminDb.collection("weeklyReports").doc(`${uid}_${report.weekStr}`).set({
+        ...report,
+        savedAt: new Date(),
+      });
+    } catch (e) {
+      console.error("Firestore save error:", uid, e);
+    }
 
-    // 自主性スコア
-    const streakScore = Math.min(streak / 7, 1) * 100;
-    const autonomyScore = Math.round(scheduledRate * 0.5 + (freeCount > 0 ? 100 : 0) * 0.3 + streakScore * 0.2);
-
-    const html = buildEmailHtml({
-      childName,
-      scheduledRate,
-      freeCount,
-      streak,
-      testCount: testsSnap.size,
-      autonomyScore,
-      testStatuses,
-      goals,
-    });
-
+    // メール送信
+    const html = buildEmailHtml(report);
     try {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: parentEmail,
-        subject: `📊 今週の${childName}さんレポート — 自主性スコア ${autonomyScore}点`,
+        subject: `📊 今週の${report.childName}さんレポート — 自主性スコア ${report.autonomyScore}点`,
         html,
       });
       sent++;

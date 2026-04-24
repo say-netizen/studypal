@@ -1,40 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { calcLevelProgress } from "@/lib/gamification/level";
+import { calcLevelProgress, levelTier } from "@/lib/gamification/level";
 
 type XpBarProps = {
   totalXp: number;
-  /** 加算前のXP (アニメーション起点) */
+  grade?: string | null;
   prevTotalXp?: number;
   onLevelUp?: (newLevel: number) => void;
 };
 
-/** レベル帯に応じたカラー */
-function levelColor(level: number): string {
-  if (level <= 10) return "#CD7F32";   // Bronze
-  if (level <= 20) return "#C0C0C0";   // Silver
-  if (level <= 30) return "#FFD700";   // Gold
-  return "var(--color-brand-blue)";    // Diamond
-}
-
-export function XpBar({ totalXp, prevTotalXp, onLevelUp }: XpBarProps) {
-  const { level, currentXp, requiredXp, progress } = calcLevelProgress(totalXp);
+export function XpBar({ totalXp, grade, prevTotalXp, onLevelUp }: XpBarProps) {
+  const { level, currentXp, requiredXp, progress } = calcLevelProgress(totalXp, grade);
   const [displayProgress, setDisplayProgress] = useState(
-    prevTotalXp !== undefined ? calcLevelProgress(prevTotalXp).progress : progress
+    prevTotalXp !== undefined ? calcLevelProgress(prevTotalXp, grade).progress : progress
   );
 
   useEffect(() => {
-    const prevInfo = prevTotalXp !== undefined ? calcLevelProgress(prevTotalXp) : null;
+    const prevInfo = prevTotalXp !== undefined ? calcLevelProgress(prevTotalXp, grade) : null;
     if (prevInfo && prevInfo.level < level) {
       onLevelUp?.(level);
     }
-    // アニメーション
     const timer = setTimeout(() => setDisplayProgress(progress), 60);
     return () => clearTimeout(timer);
-  }, [progress, prevTotalXp, level, onLevelUp]);
+  }, [progress, prevTotalXp, level, grade, onLevelUp]);
 
-  const color = levelColor(level);
+  const { color, label } = levelTier(level);
 
   return (
     <div
@@ -57,7 +48,7 @@ export function XpBar({ totalXp, prevTotalXp, onLevelUp }: XpBarProps) {
               height: "28px",
               borderRadius: "50%",
               background: color,
-              fontSize: "0.75rem",
+              fontSize: "0.7rem",
               fontWeight: 900,
               color: "#fff",
             }}
@@ -67,13 +58,24 @@ export function XpBar({ totalXp, prevTotalXp, onLevelUp }: XpBarProps) {
           <span style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--color-text-primary)" }}>
             レベル {level}
           </span>
+          <span
+            style={{
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              padding: "1px 7px",
+              borderRadius: "9999px",
+              background: color + "22",
+              color,
+            }}
+          >
+            {label}
+          </span>
         </div>
         <span style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>
-          {currentXp} / {requiredXp} XP
+          {level >= 99 ? "MAX" : `${currentXp.toLocaleString()} / ${requiredXp.toLocaleString()} XP`}
         </span>
       </div>
 
-      {/* バー */}
       <div
         role="progressbar"
         aria-valuenow={Math.round(displayProgress * 100)}
@@ -92,7 +94,7 @@ export function XpBar({ totalXp, prevTotalXp, onLevelUp }: XpBarProps) {
           style={{
             height: "100%",
             width: `${Math.min(displayProgress * 100, 100)}%`,
-            background: "linear-gradient(90deg,#58CC02,#89E219)",
+            background: `linear-gradient(90deg, ${color}, ${color}cc)`,
             borderRadius: "var(--radius-pill)",
             transition: "width 600ms cubic-bezier(0.34,1.56,0.64,1)",
           }}

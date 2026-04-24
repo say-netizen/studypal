@@ -9,13 +9,19 @@ import { storage } from "@/lib/firebase/client";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { AvatarPicker } from "@/components/ui/AvatarPicker";
 import { Avatar } from "@/components/ui/Avatar";
+import { GRADES, GRADE_STAGES } from "@/lib/gamification/grades";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function ProfileSettingsPage() {
   const { currentUser } = useAuth();
+  const [grade, setGrade] = useState<string>("");
+  const [gradeSaving, setGradeSaving] = useState(false);
+  const [gradeSaved, setGradeSaved] = useState(false);
+
   const [userData, setUserData] = useState<{
     name: string;
+    grade?: string | null;
     avatarType?: "photo" | "emoji" | "default";
     avatarUrl?: string | null;
     avatarEmoji?: string | null;
@@ -28,7 +34,10 @@ export default function ProfileSettingsPage() {
   useEffect(() => {
     if (!currentUser) return;
     getUser(currentUser.uid).then((u) => {
-      if (u) setUserData(u);
+      if (u) {
+        setUserData(u);
+        setGrade(u.grade ?? "");
+      }
       setLoading(false);
     });
   }, [currentUser]);
@@ -74,6 +83,18 @@ export default function ProfileSettingsPage() {
       setTimeout(() => setSaved(false), 2000);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleGradeSave() {
+    if (!currentUser || !grade || gradeSaving) return;
+    setGradeSaving(true);
+    try {
+      await upsertUser(currentUser.uid, { grade });
+      setGradeSaved(true);
+      setTimeout(() => setGradeSaved(false), 2000);
+    } finally {
+      setGradeSaving(false);
     }
   }
 
@@ -124,6 +145,47 @@ export default function ProfileSettingsPage() {
           ✓ 保存しました！
         </div>
       )}
+
+      {/* 学年変更 */}
+      <div
+        className="rounded-2xl p-5"
+        style={{ background: "var(--color-bg-primary)", border: "1px solid var(--color-bg-tertiary)", boxShadow: "var(--shadow-card)" }}
+      >
+        <h2 className="font-bold mb-1" style={{ color: "var(--color-text-primary)" }}>学年</h2>
+        <p className="text-xs mb-4" style={{ color: "var(--color-text-muted)" }}>
+          学年によってレベルアップに必要なXPが変わります
+        </p>
+        {GRADE_STAGES.map((stage) => (
+          <div key={stage} className="mb-2">
+            <p className="text-xs font-semibold mb-1" style={{ color: "var(--color-text-muted)" }}>{stage}</p>
+            <div className="flex gap-1.5">
+              {GRADES.filter((g) => g.stage === stage).map((g) => (
+                <button
+                  key={g.value}
+                  type="button"
+                  onClick={() => setGrade(g.value)}
+                  className="flex-1 rounded-xl py-2 text-xs font-semibold transition-all"
+                  style={{
+                    background: grade === g.value ? "var(--color-brand-blue)" : "var(--color-bg-secondary)",
+                    color: grade === g.value ? "#fff" : "var(--color-text-secondary)",
+                    border: grade === g.value ? "2px solid var(--color-brand-blue)" : "2px solid transparent",
+                  }}
+                >
+                  {g.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+        <button
+          onClick={handleGradeSave}
+          disabled={gradeSaving || !grade || grade === userData?.grade}
+          className="mt-3 w-full py-2.5 rounded-pill text-sm font-bold text-white transition-all hover:opacity-80 disabled:opacity-40"
+          style={{ background: "var(--color-brand-blue)" }}
+        >
+          {gradeSaving ? "保存中..." : gradeSaved ? "✓ 保存しました" : "学年を保存"}
+        </button>
+      </div>
 
       {/* AvatarPicker */}
       <div

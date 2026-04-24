@@ -15,13 +15,7 @@ import {
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/client";
 
-const GRADES = [
-  { value: "小学5年生", label: "小5" },
-  { value: "小学6年生", label: "小6" },
-  { value: "中学1年生", label: "中1" },
-  { value: "中学2年生", label: "中2" },
-  { value: "中学3年生", label: "中3" },
-];
+import { GRADES, GRADE_STAGES } from "@/lib/gamification/grades";
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
@@ -139,25 +133,28 @@ export default function RegisterPage() {
           <p className="text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
             学年を選んでください
           </p>
-          <div className="grid grid-cols-5 gap-1.5">
-            {GRADES.map((g) => (
-              <button
-                key={g.value}
-                type="button"
-                onClick={() => setGrade(g.value)}
-                className="rounded-xl py-2 text-xs font-semibold transition-all duration-150"
-                style={{
-                  background: grade === g.value ? "var(--color-brand-blue)" : "var(--color-bg-secondary)",
-                  color: grade === g.value ? "#fff" : "var(--color-text-secondary)",
-                  border: grade === g.value
-                    ? "2px solid var(--color-brand-blue)"
-                    : "2px solid transparent",
-                }}
-              >
-                {g.label}
-              </button>
-            ))}
-          </div>
+          {GRADE_STAGES.map((stage) => (
+            <div key={stage} className="mb-2">
+              <p className="text-xs font-semibold mb-1" style={{ color: "var(--color-text-muted)" }}>{stage}</p>
+              <div className="flex gap-1.5">
+                {GRADES.filter((g) => g.stage === stage).map((g) => (
+                  <button
+                    key={g.value}
+                    type="button"
+                    onClick={() => setGrade(g.value)}
+                    className="flex-1 rounded-xl py-2 text-xs font-semibold transition-all duration-150"
+                    style={{
+                      background: grade === g.value ? "var(--color-brand-blue)" : "var(--color-bg-secondary)",
+                      color: grade === g.value ? "#fff" : "var(--color-text-secondary)",
+                      border: grade === g.value ? "2px solid var(--color-brand-blue)" : "2px solid transparent",
+                    }}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Google 登録 */}

@@ -56,8 +56,21 @@ function StatCard({
   );
 }
 
-function XpLevelBar({ totalXp }: { totalXp: number }) {
-  const { level, currentXp, requiredXp, progress } = calcLevelProgress(totalXp);
+function XpLevelBar({ totalXp, grade }: { totalXp: number; grade?: string | null }) {
+  const { level, currentXp, requiredXp, progress, stage } = calcLevelProgress(totalXp, grade);
+  const stageLabel = stage === "elementary" ? "小学生" : stage === "middle" ? "中学生" : "高校生";
+
+  // レベル帯カラー
+  const color =
+    level <= 15 ? "#CD7F32" :
+    level <= 30 ? "#A8A9AD" :
+    level <= 50 ? "#FFD700" :
+    level <= 70 ? "#00C9A7" :
+    level <= 85 ? "#1CB0F6" : "#9B5DE5";
+  const tierLabel =
+    level <= 15 ? "Bronze" : level <= 30 ? "Silver" : level <= 50 ? "Gold" :
+    level <= 70 ? "Platinum" : level <= 85 ? "Diamond" : "Master";
+
   return (
     <div
       className="rounded-2xl p-5"
@@ -71,19 +84,27 @@ function XpLevelBar({ totalXp }: { totalXp: number }) {
         <div className="flex items-center gap-2">
           <span
             className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black text-white"
-            style={{ background: "var(--color-brand-purple)" }}
+            style={{ background: color }}
           >
             {level}
           </span>
           <span className="font-bold text-sm" style={{ color: "var(--color-text-primary)" }}>
             レベル {level}
           </span>
+          <span
+            className="text-xs font-bold px-2 py-0.5 rounded-full"
+            style={{ background: color + "22", color }}
+          >
+            {tierLabel}
+          </span>
+          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+            · {stageLabel}
+          </span>
         </div>
         <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-          {currentXp} / {requiredXp} XP
+          {level >= 99 ? "MAX" : `${currentXp.toLocaleString()} / ${requiredXp.toLocaleString()} XP`}
         </span>
       </div>
-      {/* プログレスバー */}
       <div
         className="w-full h-3 rounded-full overflow-hidden"
         style={{ background: "var(--color-bg-tertiary)" }}
@@ -92,7 +113,7 @@ function XpLevelBar({ totalXp }: { totalXp: number }) {
           className="h-full rounded-full transition-all duration-700"
           style={{
             width: `${Math.min(progress * 100, 100)}%`,
-            background: "linear-gradient(90deg, var(--color-brand-green), #89E219)",
+            background: `linear-gradient(90deg, ${color}, ${color}cc)`,
           }}
         />
       </div>
@@ -217,8 +238,9 @@ export default function DashboardPage() {
   }, [currentUser, today]);
 
   const displayName = currentUser?.displayName ?? "ゲスト";
-  const totalXp = userData?.totalXp ?? 0;
+  const totalXp = Number.isFinite(userData?.totalXp) ? (userData!.totalXp) : 0;
   const streak = userData?.currentStreak ?? 0;
+  const grade = userData?.grade ?? null;
 
   if (loading) {
     return (
@@ -247,7 +269,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── XP / レベルバー ── */}
-      <XpLevelBar totalXp={totalXp} />
+      <XpLevelBar totalXp={totalXp} grade={grade} />
 
       {/* ── スタットカード ── */}
       <div className="grid grid-cols-2 gap-3">
@@ -260,7 +282,7 @@ export default function DashboardPage() {
         <StatCard
           icon={<Star size={20} />}
           label="累計XP"
-          value={totalXp.toLocaleString()}
+          value={Number.isFinite(totalXp) ? totalXp.toLocaleString() : "0"}
           color="var(--color-xp-gold)"
         />
       </div>

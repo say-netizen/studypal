@@ -163,7 +163,7 @@ export default function ProfilePage() {
       {/* ステータスカード */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: <Star size={16} />, label: "累計XP", value: user.totalXp.toLocaleString(), color: "var(--color-xp-gold)" },
+          { icon: <Star size={16} />, label: "累計XP", value: (Number.isFinite(user.totalXp) ? user.totalXp : 0).toLocaleString(), color: "var(--color-xp-gold)" },
           { icon: <Flame size={16} />, label: "ストリーク", value: `${user.currentStreak}日`, color: "var(--color-streak)" },
           { icon: <Clock size={16} />, label: "今週勉強", value: `${Object.values(minutesByDay).reduce((a, b) => a + b, 0)}分`, color: "var(--color-brand-blue)" },
         ].map((item) => (
