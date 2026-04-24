@@ -109,7 +109,6 @@ export default function FamilySettingsPage() {
       }
       setLinkMsg({ ok: true, text: `${data.child!.name}さんと連携しました！` });
       setLinkedChildren((prev) => [...prev, data.child!]);
-      setChildUids((prev) => [...prev, data.child!.uid]);
       setInputCode("");
     } finally {
       setLinking(false);
@@ -127,7 +126,6 @@ export default function FamilySettingsPage() {
         body: JSON.stringify({ childUid }),
       });
       setLinkedChildren((prev) => prev.filter((c) => c.uid !== childUid));
-      setChildUids((prev) => prev.filter((c) => c !== childUid));
     } finally {
       setUnlinking(null);
     }
