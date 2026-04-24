@@ -232,13 +232,6 @@ export default function ParentPage() {
   const childName = isViewingChild ? childData!.child.name : userData?.name ?? "お子さん";
   const currentStreak = isViewingChild ? childData!.child.currentStreak : userData?.currentStreak ?? 0;
   const currentLevel = isViewingChild ? childData!.child.currentLevel : userData?.currentLevel ?? 1;
-  const effectiveSessions = isViewingChild ? childData!.sessions : sessions;
-  const effectiveTests = isViewingChild
-    ? childData!.tests.map((t) => ({
-        ...t,
-        testDate: { toDate: () => new Date(t.testDate) } as unknown as import("firebase/firestore").Timestamp,
-      }))
-    : upcomingTests;
   const effectiveGoals = isViewingChild
     ? childData!.goals.map((g) => ({
         ...g,
