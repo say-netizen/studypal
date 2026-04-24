@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb, adminAuth } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
-import { differenceInDays } from "date-fns";
 
 export const dynamic = "force-dynamic";
 

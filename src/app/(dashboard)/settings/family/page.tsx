@@ -19,7 +19,6 @@ export default function FamilySettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<string>("free");
-  const [childUids, setChildUids] = useState<string[]>([]);
   const [parentUid, setParentUid] = useState<string | null>(null);
 
   // 子ども側: 生成した招待コード
@@ -42,7 +41,6 @@ export default function FamilySettingsPage() {
         const user = await getUser(currentUser!.uid);
         if (!user) return;
         setPlan(user.plan ?? "free");
-        setChildUids(user.childUids ?? []);
         setParentUid(user.parentUid ?? null);
 
         // 保護者側: 子どもの情報を取得
