@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { getUser, type UserDoc } from "@/lib/firebase/schema";
-import { Check, Sparkles, Users, Loader2, Crown } from "lucide-react";
+import { Check, Sparkles, Users, Loader2, Crown, ChevronRight, UserCircle } from "lucide-react";
+import Link from "next/link";
 
 const PLANS = [
   {
@@ -247,6 +248,30 @@ export default function BillingPage() {
       <p className="text-xs text-center" style={{ color: "var(--color-text-muted)" }}>
         料金はすべて税込。いつでも解約可能。支払いはStripeで安全に処理されます。
       </p>
+
+      {/* その他の設定 */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: "var(--color-bg-primary)", border: "1px solid var(--color-bg-tertiary)" }}>
+        {[
+          { href: "/settings/profile", icon: UserCircle, label: "プロフィール設定", desc: "アイコン・学年を変更" },
+          { href: "/settings/family", icon: Users, label: "家族連携", desc: "保護者と子どもを紐付け" },
+        ].map(({ href, icon: Icon, label, desc }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex items-center gap-4 px-5 py-4 border-b last:border-b-0 transition-all hover:opacity-80"
+            style={{ borderColor: "var(--color-bg-tertiary)" }}
+          >
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "var(--color-bg-secondary)" }}>
+              <Icon size={18} style={{ color: "var(--color-text-secondary)" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold" style={{ color: "var(--color-text-primary)" }}>{label}</p>
+              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>{desc}</p>
+            </div>
+            <ChevronRight size={16} style={{ color: "var(--color-text-muted)" }} />
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

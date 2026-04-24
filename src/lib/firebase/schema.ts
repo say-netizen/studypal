@@ -47,7 +47,18 @@ export interface UserDoc {
   // 保護者設定
   parentEmail?: string | null;
   weeklyReport?: boolean;
+  // 家族連携
+  parentUid?: string | null;
+  childUids?: string[];
   createdAt: Timestamp;
+}
+
+export interface InviteCodeDoc {
+  code: string;
+  childUid: string;
+  createdAt: Timestamp;
+  expiresAt: Timestamp;
+  used: boolean;
 }
 
 export interface GoalDoc {
@@ -482,4 +493,39 @@ export async function getWeeklyReports(uid: string, limitCount = 12) {
   );
   const snap = await getDocs(q);
   return snap.docs.map((d) => snapToData<WeeklyReportDoc>(d));
+}
+
+// ─────────────────────────────────────────
+// inviteCodes — inviteCodes/{code}
+// ─────────────────────────────────────────
+
+export async function createInviteCode(childUid: string, code: string): Promise<void> {
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  await setDoc(doc(db(), "inviteCodes", code), {
+    code,
+    childUid,
+    createdAt: serverTimestamp(),
+    expiresAt,
+    used: false,
+  });
+}
+
+export async function getInviteCode(code: string): Promise<(InviteCodeDoc & { id: string }) | null> {
+  const snap = await getDoc(doc(db(), "inviteCodes", code));
+  return snap.exists() ? snapToData<InviteCodeDoc>(snap) : null;
+}
+
+export async function markInviteCodeUsed(code: string): Promise<void> {
+  await updateDoc(doc(db(), "inviteCodes", code), { used: true });
+}
+
+export async function linkParentToChild(parentUid: string, childUid: string): Promise<void> {
+  // 子のuserドキュメントにparentUidを設定
+  await setDoc(doc(db(), "users", childUid), { parentUid }, { merge: true });
+  // 親のuserドキュメントにchildUidを追加
+  const parentSnap = await getDoc(doc(db(), "users", parentUid));
+  const existing: string[] = (parentSnap.data()?.childUids as string[]) ?? [];
+  if (!existing.includes(childUid)) {
+    await setDoc(doc(db(), "users", parentUid), { childUids: [...existing, childUid] }, { merge: true });
+  }
 }
