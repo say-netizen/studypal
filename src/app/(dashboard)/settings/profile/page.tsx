@@ -5,7 +5,8 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { getUser, upsertUser } from "@/lib/firebase/schema";
-import { storage } from "@/lib/firebase/client";
+import { storage, auth } from "@/lib/firebase/client";
+import { updateProfile } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { AvatarPicker } from "@/components/ui/AvatarPicker";
 import { Avatar } from "@/components/ui/Avatar";
@@ -15,6 +16,10 @@ import Link from "next/link";
 
 export default function ProfileSettingsPage() {
   const { currentUser } = useAuth();
+  const [name, setName] = useState<string>("");
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameSaved, setNameSaved] = useState(false);
+
   const [grade, setGrade] = useState<string>("");
   const [gradeSaving, setGradeSaving] = useState(false);
   const [gradeSaved, setGradeSaved] = useState(false);
@@ -36,6 +41,7 @@ export default function ProfileSettingsPage() {
     getUser(currentUser.uid).then((u) => {
       if (u) {
         setUserData(u);
+        setName(u.name ?? "");
         setGrade(u.grade ?? "");
       }
       setLoading(false);
@@ -83,6 +89,20 @@ export default function ProfileSettingsPage() {
       setTimeout(() => setSaved(false), 2000);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleNameSave() {
+    if (!currentUser || !name.trim() || nameSaving) return;
+    setNameSaving(true);
+    try {
+      await upsertUser(currentUser.uid, { name: name.trim() });
+      await updateProfile(auth().currentUser!, { displayName: name.trim() });
+      setUserData((prev) => prev ? { ...prev, name: name.trim() } : prev);
+      setNameSaved(true);
+      setTimeout(() => setNameSaved(false), 2000);
+    } finally {
+      setNameSaving(false);
     }
   }
 
@@ -145,6 +165,40 @@ export default function ProfileSettingsPage() {
           ✓ 保存しました！
         </div>
       )}
+
+      {/* 名前変更 */}
+      <div
+        className="rounded-2xl p-5"
+        style={{ background: "var(--color-bg-primary)", border: "1px solid var(--color-bg-tertiary)", boxShadow: "var(--shadow-card)" }}
+      >
+        <h2 className="font-bold mb-1" style={{ color: "var(--color-text-primary)" }}>ニックネーム</h2>
+        <p className="text-xs mb-3" style={{ color: "var(--color-text-muted)" }}>
+          ランキングやプロフィールに表示される名前です
+        </p>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={20}
+          placeholder="ニックネームを入力"
+          className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all mb-3"
+          style={{
+            background: "var(--color-bg-secondary)",
+            border: "2px solid var(--color-bg-tertiary)",
+            color: "var(--color-text-primary)",
+          }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = "var(--color-brand-blue)")}
+          onBlur={(e) => (e.currentTarget.style.borderColor = "var(--color-bg-tertiary)")}
+        />
+        <button
+          onClick={handleNameSave}
+          disabled={nameSaving || !name.trim() || name.trim() === userData?.name}
+          className="w-full py-2.5 rounded-pill text-sm font-bold text-white transition-all hover:opacity-80 disabled:opacity-40"
+          style={{ background: "var(--color-brand-blue)" }}
+        >
+          {nameSaving ? "保存中..." : nameSaved ? "✓ 保存しました" : "名前を保存"}
+        </button>
+      </div>
 
       {/* 学年変更 */}
       <div
