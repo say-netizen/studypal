@@ -12,20 +12,20 @@ import {
   Trophy,
   Settings,
   LogOut,
-  MessageCircle,
+  GraduationCap,
   Crown,
   Target,
   Users,
 } from "lucide-react";
 
 const STUDENT_NAV = [
-  { href: "/dashboard", icon: Home,          label: "ホーム" },
-  { href: "/study",     icon: Timer,         label: "タイマー" },
-  { href: "/calendar",  icon: Calendar,      label: "カレンダー" },
-  { href: "/goals",     icon: Target,        label: "目標" },
-  { href: "/chat",      icon: MessageCircle, label: "AI質問" },
-  { href: "/ranking",   icon: Trophy,        label: "ランキング" },
-  { href: "/settings",  icon: Settings,      label: "設定" },
+  { href: "/dashboard",  icon: Home,           label: "ホーム" },
+  { href: "/study",      icon: Timer,          label: "タイマー" },
+  { href: "/calendar",   icon: Calendar,       label: "カレンダー" },
+  { href: "/goals",      icon: Target,         label: "目標" },
+  { href: "/chat",       icon: GraduationCap,  label: "AI塾講師" },
+  { href: "/ranking",    icon: Trophy,         label: "ランキング" },
+  { href: "/settings",   icon: Settings,       label: "設定" },
 ];
 
 const PARENT_NAV = [
