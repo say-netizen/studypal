@@ -50,6 +50,8 @@ export interface UserDoc {
   // 家族連携
   parentUid?: string | null;
   childUids?: string[];
+  // アカウント種別
+  role?: "student" | "parent";
   createdAt: Timestamp;
 }
 

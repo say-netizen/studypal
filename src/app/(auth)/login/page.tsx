@@ -2,34 +2,50 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { getUser } from "@/lib/firebase/schema";
 
 export default function LoginPage() {
   const { signInWithGoogle, signInWithEmail, currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") ?? "/dashboard";
+  const explicitRedirect = searchParams.get("redirect");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const redirectedRef = useRef(false);
 
-  // Googleリダイレクト後にログイン済みになったら自動遷移
-  useEffect(() => {
-    if (!authLoading && currentUser) {
-      router.replace(redirect);
+  async function resolveDestination(uid: string): Promise<string> {
+    if (explicitRedirect) return explicitRedirect;
+    try {
+      const user = await getUser(uid);
+      return user?.role === "parent" ? "/parent" : "/dashboard";
+    } catch {
+      return "/dashboard";
     }
-  }, [currentUser, authLoading, redirect, router]);
+  }
+
+  // Googleリダイレクト後またはすでにログイン済みの場合に遷移
+  useEffect(() => {
+    if (!authLoading && currentUser && !redirectedRef.current) {
+      redirectedRef.current = true;
+      resolveDestination(currentUser.uid).then((dest) => {
+        router.replace(dest);
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, authLoading]);
 
   async function handleGoogle() {
     setLoading(true);
     setError("");
     try {
-      await signInWithGoogle(); // リダイレクトするのでここ以降は実行されない
+      await signInWithGoogle();
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? "unknown";
       console.error("Google login error:", code, e);
@@ -45,10 +61,9 @@ export default function LoginPage() {
     setError("");
     try {
       await signInWithEmail(email, password);
-      router.push(redirect);
+      // useEffect が currentUser の変化を検知してリダイレクト
     } catch {
       setError("メールアドレスまたはパスワードが正しくありません。");
-    } finally {
       setLoading(false);
     }
   }
@@ -91,7 +106,6 @@ export default function LoginPage() {
             boxShadow: "var(--shadow-card)",
           }}
         >
-          {/* Google SVG */}
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>

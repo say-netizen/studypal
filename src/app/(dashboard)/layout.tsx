@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { getUser } from "@/lib/firebase/schema";
 import {
   Home,
   Timer,
@@ -13,9 +15,10 @@ import {
   MessageCircle,
   Crown,
   Target,
+  Users,
 } from "lucide-react";
 
-const NAV_ITEMS = [
+const STUDENT_NAV = [
   { href: "/dashboard", icon: Home,          label: "ホーム" },
   { href: "/study",     icon: Timer,         label: "タイマー" },
   { href: "/calendar",  icon: Calendar,      label: "カレンダー" },
@@ -23,6 +26,12 @@ const NAV_ITEMS = [
   { href: "/chat",      icon: MessageCircle, label: "AI質問" },
   { href: "/ranking",   icon: Trophy,        label: "ランキング" },
   { href: "/settings",  icon: Settings,      label: "設定" },
+];
+
+const PARENT_NAV = [
+  { href: "/parent",          icon: Home,     label: "ホーム" },
+  { href: "/settings/family", icon: Users,    label: "子ども管理" },
+  { href: "/settings",        icon: Settings, label: "設定" },
 ];
 
 function NavItem({
@@ -64,14 +73,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const { currentUser, loading, logout } = useAuth();
   const router = useRouter();
+  const [userRole, setUserRole] = useState<"student" | "parent" | null>(null);
 
-  // 未ログインならloginへリダイレクト
-  if (!loading && !currentUser) {
-    router.replace("/login?redirect=" + encodeURIComponent(pathname));
-    return null;
-  }
+  // 未ログインのリダイレクト
+  useEffect(() => {
+    if (!loading && !currentUser) {
+      router.replace("/login?redirect=" + encodeURIComponent(pathname));
+    }
+  }, [loading, currentUser, pathname, router]);
 
-  if (loading) {
+  // ユーザーのロールを取得
+  useEffect(() => {
+    if (!currentUser) return;
+    getUser(currentUser.uid)
+      .then((u) => setUserRole(u?.role ?? "student"))
+      .catch(() => setUserRole("student"));
+  }, [currentUser]);
+
+  // ロールに応じたルーティング修正
+  useEffect(() => {
+    if (!userRole) return;
+    if (userRole === "parent" && pathname === "/dashboard") {
+      router.replace("/parent");
+    } else if (userRole === "student" && pathname === "/parent") {
+      router.replace("/dashboard");
+    }
+  }, [userRole, pathname, router]);
+
+  if (loading || (!currentUser && !loading)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div
@@ -87,6 +116,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push("/login");
   }
 
+  const navItems = userRole === "parent" ? PARENT_NAV : STUDENT_NAV;
+  const homeHref = userRole === "parent" ? "/parent" : "/dashboard";
   const initial = currentUser?.displayName?.[0]?.toUpperCase() ?? "U";
 
   return (
@@ -101,7 +132,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {/* ロゴ */}
         <div className="px-5 py-5 border-b" style={{ borderColor: "var(--color-bg-tertiary)" }}>
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href={homeHref} className="flex items-center gap-2">
             <span className="text-2xl">📚</span>
             <span
               className="text-lg font-display font-black"
@@ -114,7 +145,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* ナビ */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <NavItem
               key={item.href}
               {...item}
@@ -123,21 +154,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
 
-        {/* アップグレードCTA */}
-        <div className="px-3 pb-2">
-          <Link
-            href="/settings/billing"
-            className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5"
-            style={{
-              background: "linear-gradient(135deg, rgba(155,93,229,0.15), rgba(28,176,246,0.15))",
-              border: "1px solid rgba(155,93,229,0.3)",
-              color: "var(--color-brand-purple)",
-            }}
-          >
-            <Crown size={15} />
-            Proにアップグレード
-          </Link>
-        </div>
+        {/* アップグレードCTA (生徒のみ) */}
+        {userRole !== "parent" && (
+          <div className="px-3 pb-2">
+            <Link
+              href="/settings/billing"
+              className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5"
+              style={{
+                background: "linear-gradient(135deg, rgba(155,93,229,0.15), rgba(28,176,246,0.15))",
+                border: "1px solid rgba(155,93,229,0.3)",
+                color: "var(--color-brand-purple)",
+              }}
+            >
+              <Crown size={15} />
+              Proにアップグレード
+            </Link>
+          </div>
+        )}
 
         {/* ユーザー情報 */}
         <div
@@ -193,7 +226,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           borderTop: "1px solid var(--color-bg-tertiary)",
         }}
       >
-        {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
+        {navItems.map(({ href, icon: Icon, label }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
