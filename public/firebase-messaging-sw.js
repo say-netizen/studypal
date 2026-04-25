@@ -1,15 +1,15 @@
 importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js");
 
-// Firebase設定はService Worker内ではprocess.envが使えないため直接記述する必要があります
-// 本番では環境変数からビルド時に差し替えてください
+// Service Worker はビルド時の process.env にアクセスできないため
+// NEXT_PUBLIC_* 値（クライアントに公開済み）を直接記述する
 firebase.initializeApp({
-  apiKey:            self.FIREBASE_API_KEY ?? "",
-  authDomain:        self.FIREBASE_AUTH_DOMAIN ?? "",
-  projectId:         self.FIREBASE_PROJECT_ID ?? "",
-  storageBucket:     self.FIREBASE_STORAGE_BUCKET ?? "",
-  messagingSenderId: self.FIREBASE_MESSAGING_SENDER_ID ?? "",
-  appId:             self.FIREBASE_APP_ID ?? "",
+  apiKey:            "AIzaSyDcH7PyIk7Kk92Vl7lyjK2Epu0s7spr0x0",
+  authDomain:        "studypal-b4f35.firebaseapp.com",
+  projectId:         "studypal-b4f35",
+  storageBucket:     "studypal-b4f35.firebasestorage.app",
+  messagingSenderId: "944244063554",
+  appId:             "1:944244063554:web:84b6fbde80973c9f881cdb",
 });
 
 const messaging = firebase.messaging();
