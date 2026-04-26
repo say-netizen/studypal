@@ -67,9 +67,7 @@ export default function ProfileSettingsPage() {
       let avatarUrl: string | null = userData?.avatarUrl ?? null;
 
       if (data.type === "photo" && data.file) {
-        // Firebase Storage にアップロード
         const storageRef = ref(storage(), `avatars/${currentUser.uid}/profile.jpg`);
-        // 画像をcanvasでリサイズ
         const resized = await resizeImage(data.file, 256);
         await uploadBytes(storageRef, resized, { contentType: "image/jpeg" });
         avatarUrl = await getDownloadURL(storageRef);
@@ -94,6 +92,9 @@ export default function ProfileSettingsPage() {
       setUserData((prev) => prev ? { ...prev, ...update } : prev);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+    } catch (e) {
+      console.error("avatar save error:", e);
+      alert("保存に失敗しました。Firebase StorageがConsoleで有効化されているか確認してください。");
     } finally {
       setSaving(false);
     }

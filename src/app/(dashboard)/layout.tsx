@@ -25,13 +25,13 @@ const STUDENT_NAV = [
   { href: "/goals",      icon: Target,         label: "目標" },
   { href: "/chat",       icon: GraduationCap,  label: "AI塾講師" },
   { href: "/ranking",    icon: Trophy,         label: "ランキング" },
-  { href: "/settings",   icon: Settings,       label: "設定" },
+  { href: "/settings",   icon: Settings,       label: "マイページ" },
 ];
 
 const PARENT_NAV = [
   { href: "/parent",          icon: Home,     label: "ホーム" },
   { href: "/settings/family", icon: Users,    label: "子ども管理" },
-  { href: "/settings",        icon: Settings, label: "設定" },
+  { href: "/settings",        icon: Settings, label: "マイページ" },
 ];
 
 function NavItem({
@@ -177,14 +177,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           className="p-4 border-t"
           style={{ borderColor: "var(--color-bg-tertiary)" }}
         >
-          <div className="flex items-center gap-3 mb-3">
+          <Link
+            href={currentUser ? `/profile/${currentUser.uid}` : "#"}
+            className="flex items-center gap-3 mb-3 rounded-xl px-2 py-1.5 -mx-2 transition-all hover:opacity-70"
+          >
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
               style={{ background: "var(--color-brand-blue)" }}
             >
               {initial}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p
                 className="text-sm font-semibold truncate"
                 style={{ color: "var(--color-text-primary)" }}
@@ -193,12 +196,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </p>
               <p
                 className="text-xs truncate"
-                style={{ color: "var(--color-text-muted)" }}
+                style={{ color: "var(--color-brand-blue)" }}
               >
-                {currentUser?.email}
+                プロフィールを見る →
               </p>
             </div>
-          </div>
+          </Link>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 hover:opacity-80"

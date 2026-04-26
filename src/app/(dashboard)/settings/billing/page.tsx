@@ -280,6 +280,7 @@ export default function BillingPage() {
       {/* その他の設定 */}
       <div className="rounded-2xl overflow-hidden" style={{ background: "var(--color-bg-primary)", border: "1px solid var(--color-bg-tertiary)" }}>
         {[
+          { href: currentUser ? `/profile/${currentUser.uid}` : "#", icon: UserCircle, label: "マイプロフィール", desc: "ランキングや他のユーザーに表示される画面" },
           { href: "/settings/profile", icon: UserCircle, label: "プロフィール設定", desc: "アイコン・学年・ロールを変更" },
           { href: "/settings/family", icon: Users, label: "家族連携", desc: "保護者と子どもを紐付け" },
         ].map(({ href, icon: Icon, label, desc }) => (
