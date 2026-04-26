@@ -3,9 +3,11 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { getUser, getUserTests, getSchedulesByDate, type UserDoc, type TestDoc, type ScheduleDoc } from "@/lib/firebase/schema";
 import { calcLevelProgress } from "@/lib/gamification/level";
+import { Avatar } from "@/components/ui/Avatar";
 import { format, differenceInDays } from "date-fns";
 import { ja } from "date-fns/locale";
 import {
@@ -60,7 +62,6 @@ function XpLevelBar({ totalXp, grade }: { totalXp: number; grade?: string | null
   const { level, currentXp, requiredXp, progress, stage } = calcLevelProgress(totalXp, grade);
   const stageLabel = stage === "elementary" ? "小学生" : stage === "middle" ? "中学生" : "高校生";
 
-  // レベル帯カラー
   const color =
     level <= 15 ? "#CD7F32" :
     level <= 30 ? "#A8A9AD" :
@@ -256,16 +257,44 @@ export default function DashboardPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
       {/* ── ウェルカム ── */}
-      <div>
-        <h1
-          className="text-2xl font-display font-black"
-          style={{ color: "var(--color-text-primary)" }}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1
+            className="text-2xl font-display font-black"
+            style={{ color: "var(--color-text-primary)" }}
+          >
+            おかえり、{displayName.split("").slice(0, 6).join("")}さん！ 👋
+          </h1>
+          <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+            {todayLabel} · 今日も一緒に頑張ろう
+          </p>
+        </div>
+
+        {/* プロフィールボタン */}
+        <Link
+          href={`/profile/${currentUser?.uid}`}
+          className="flex-shrink-0 transition-transform hover:scale-105 active:scale-95"
+          title="プロフィールを見る"
         >
-          おかえり、{displayName.split("").slice(0, 6).join("")}さん！ 👋
-        </h1>
-        <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-          {todayLabel} · 今日も一緒に頑張ろう
-        </p>
+          <div style={{ position: "relative" }}>
+            <Avatar
+              name={displayName}
+              avatarType={userData?.avatarType}
+              avatarUrl={userData?.avatarUrl}
+              avatarEmoji={userData?.avatarEmoji}
+              avatarColor={userData?.avatarColor}
+              size={44}
+            />
+            {streak >= 3 && (
+              <span
+                className="absolute -bottom-1 -right-1 text-xs leading-none"
+                style={{ fontSize: "14px" }}
+              >
+                🔥
+              </span>
+            )}
+          </div>
+        </Link>
       </div>
 
       {/* ── XP / レベルバー ── */}
