@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { getUser } from "@/lib/firebase/schema";
 
 export default function LoginPage() {
-  const { signInWithGoogle, signInWithEmail, currentUser, loading: authLoading } = useAuth();
+  const { signInWithGoogle, signInWithEmail, currentUser, loading: authLoading, logout } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const explicitRedirect = searchParams.get("redirect");
@@ -18,7 +18,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showAlreadyLoggedIn, setShowAlreadyLoggedIn] = useState(false);
+
   const redirectedRef = useRef(false);
+  const alreadyLoggedInRef = useRef(false); // Effect 2 が同期的に読む用
+  const initializedRef = useRef(false);     // 初回 auth 解決済みフラグ
 
   async function resolveDestination(uid: string): Promise<string> {
     if (explicitRedirect) return explicitRedirect;
@@ -30,13 +34,22 @@ export default function LoginPage() {
     }
   }
 
-  // Googleリダイレクト後またはすでにログイン済みの場合に遷移
+  // auth が初めて解決したとき: 既にログイン済みなら「切り替え」画面を表示
   useEffect(() => {
-    if (!authLoading && currentUser && !redirectedRef.current) {
+    if (!authLoading && !initializedRef.current) {
+      initializedRef.current = true;
+      if (currentUser) {
+        alreadyLoggedInRef.current = true;
+        setShowAlreadyLoggedIn(true);
+      }
+    }
+  }, [authLoading, currentUser]);
+
+  // 新規ログイン後の自動遷移（既存ログイン済みの場合はスキップ）
+  useEffect(() => {
+    if (!authLoading && currentUser && !redirectedRef.current && !alreadyLoggedInRef.current) {
       redirectedRef.current = true;
-      resolveDestination(currentUser.uid).then((dest) => {
-        router.replace(dest);
-      });
+      resolveDestination(currentUser.uid).then((dest) => router.replace(dest));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, authLoading]);
@@ -45,11 +58,13 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(); // popup が閉じると resolve
+      // onAuthStateChanged → currentUser が更新 → 上の Effect が遷移
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? "unknown";
-      console.error("Google login error:", code, e);
-      setError(`Googleログインに失敗しました。(${code})`);
+      if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
+        setError(`Googleログインに失敗しました。(${code})`);
+      }
       setLoading(false);
     }
   }
@@ -61,11 +76,56 @@ export default function LoginPage() {
     setError("");
     try {
       await signInWithEmail(email, password);
-      // useEffect が currentUser の変化を検知してリダイレクト
     } catch {
       setError("メールアドレスまたはパスワードが正しくありません。");
       setLoading(false);
     }
+  }
+
+  function handleSwitchAccount() {
+    logout().then(() => {
+      alreadyLoggedInRef.current = false;
+      initializedRef.current = false;
+      redirectedRef.current = false;
+      setShowAlreadyLoggedIn(false);
+    });
+  }
+
+  // 既にログイン済みの場合: 続けるか切り替えるか選ばせる
+  if (showAlreadyLoggedIn && currentUser) {
+    return (
+      <div className="w-full max-w-md space-y-4">
+        <div className="text-center">
+          <span className="text-3xl">📚</span>
+          <p className="text-xl font-display font-black mt-2" style={{ color: "var(--color-brand-green)" }}>StudyPal</p>
+        </div>
+        <div
+          className="rounded-2xl p-6 space-y-4"
+          style={{ background: "var(--color-surface-card)", border: "1px solid var(--color-bg-tertiary)" }}
+        >
+          <p className="text-sm font-semibold text-center" style={{ color: "var(--color-text-secondary)" }}>
+            ログイン中のアカウント
+          </p>
+          <p className="text-center font-bold" style={{ color: "var(--color-text-primary)" }}>
+            {currentUser.displayName ?? currentUser.email}
+          </p>
+          <button
+            onClick={() => router.replace(explicitRedirect ?? "/dashboard")}
+            className="w-full py-3 rounded-full font-bold text-white transition-all hover:-translate-y-0.5"
+            style={{ background: "var(--color-brand-blue)", boxShadow: "var(--shadow-btn-blue)" }}
+          >
+            このアカウントで続ける
+          </button>
+          <button
+            onClick={handleSwitchAccount}
+            className="w-full py-3 rounded-full font-semibold transition-all hover:opacity-80"
+            style={{ background: "var(--color-bg-secondary)", color: "var(--color-text-secondary)", border: "1px solid var(--color-bg-tertiary)" }}
+          >
+            別のアカウントに切り替え
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

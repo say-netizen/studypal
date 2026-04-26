@@ -9,8 +9,7 @@ import {
 } from "react";
 import {
   onAuthStateChanged,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   signInWithEmailAndPassword,
   signOut,
   GoogleAuthProvider,
@@ -36,9 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // リダイレクト結果を処理（Googleログイン後に戻ってきたとき）
-    getRedirectResult(auth()).catch(() => {});
-
     const unsubscribe = onAuthStateChanged(auth(), (user) => {
       setCurrentUser(user);
       setLoading(false);
@@ -47,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function signInWithGoogle() {
-    await signInWithRedirect(auth(), googleProvider);
+    await signInWithPopup(auth(), googleProvider);
   }
 
   async function signInWithEmail(email: string, password: string) {

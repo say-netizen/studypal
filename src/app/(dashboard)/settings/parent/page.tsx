@@ -31,15 +31,18 @@ export default function ParentSettingsPage() {
     if (!currentUser) return;
     setSaving(true);
     try {
-      await upsertUser(currentUser.uid, {
-        parentEmail: parentEmail.trim() || null,
-        weeklyReport,
-      });
+      await upsertUser(currentUser.uid, { parentEmail: parentEmail.trim() || null });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleToggleWeeklyReport(next: boolean) {
+    if (!currentUser) return;
+    setWeeklyReport(next);
+    await upsertUser(currentUser.uid, { weeklyReport: next });
   }
 
   if (loading) {
@@ -122,13 +125,13 @@ export default function ParentSettingsPage() {
             </p>
           </div>
           <button
-            onClick={() => setWeeklyReport((v) => !v)}
+            onClick={() => handleToggleWeeklyReport(!weeklyReport)}
             className="relative w-12 h-6 rounded-full transition-colors duration-200 flex-shrink-0"
             style={{ background: weeklyReport ? "var(--color-brand-green)" : "var(--color-bg-tertiary)" }}
           >
             <span
-              className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200"
-              style={{ transform: weeklyReport ? "translateX(26px)" : "translateX(2px)" }}
+              className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200"
+              style={{ transform: weeklyReport ? "translateX(24px)" : "translateX(0)" }}
             />
           </button>
         </div>

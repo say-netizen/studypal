@@ -19,9 +19,14 @@ export default function GoalsPage() {
 
   async function load() {
     if (!currentUser) return;
-    const data = await getUserGoals(currentUser.uid);
-    setGoals(data as (GoalDoc & { id: string })[]);
-    setLoading(false);
+    try {
+      const data = await getUserGoals(currentUser.uid);
+      setGoals(data as (GoalDoc & { id: string })[]);
+    } catch (e) {
+      console.error("goals fetch error:", e);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, [currentUser]);

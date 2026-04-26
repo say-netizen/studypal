@@ -11,7 +11,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { AvatarPicker } from "@/components/ui/AvatarPicker";
 import { Avatar } from "@/components/ui/Avatar";
 import { GRADES, GRADE_STAGES } from "@/lib/gamification/grades";
-import { ArrowLeft, GraduationCap, Users } from "lucide-react";
+import { ArrowLeft, GraduationCap, Users, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -330,6 +330,18 @@ export default function ProfileSettingsPage() {
           onSave={handleSave}
           saving={saving}
         />
+      </div>
+
+      {/* 退会リンク */}
+      <div className="text-center pt-2 pb-4">
+        <Link
+          href="/settings/billing#delete"
+          className="inline-flex items-center gap-1.5 text-xs transition-opacity hover:opacity-60"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          <Trash2 size={12} />
+          退会する
+        </Link>
       </div>
     </div>
   );

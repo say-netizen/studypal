@@ -6,8 +6,9 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { getUser, type UserDoc } from "@/lib/firebase/schema";
-import { Check, Sparkles, Users, Loader2, Crown, ChevronRight, UserCircle } from "lucide-react";
+import { Check, Sparkles, Users, Loader2, Crown, ChevronRight, UserCircle, LogOut, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const PLANS = [
   {
@@ -62,13 +63,17 @@ const PLANS = [
 type PlanId = (typeof PLANS)[number]["id"];
 
 export default function BillingPage() {
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const searchParams = useSearchParams();
   const upgraded = searchParams.get("upgraded") === "true";
+  const router = useRouter();
 
   const [userData, setUserData] = useState<UserDoc | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -100,6 +105,29 @@ export default function BillingPage() {
       alert(`チェックアウトの開始に失敗しました: ${e}`);
     } finally {
       setCheckoutLoading(null);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (!currentUser) return;
+    setDeleteLoading(true);
+    try {
+      const token = await currentUser.getIdToken();
+      const res = await fetch("/api/account/delete", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(`退会に失敗しました: ${data.error ?? "不明なエラー"}`);
+        return;
+      }
+      await logout();
+      router.replace("/");
+    } catch (e) {
+      alert(`退会処理中にエラーが発生しました: ${e}`);
+    } finally {
+      setDeleteLoading(false);
     }
   }
 
@@ -252,7 +280,7 @@ export default function BillingPage() {
       {/* その他の設定 */}
       <div className="rounded-2xl overflow-hidden" style={{ background: "var(--color-bg-primary)", border: "1px solid var(--color-bg-tertiary)" }}>
         {[
-          { href: "/settings/profile", icon: UserCircle, label: "プロフィール設定", desc: "アイコン・学年を変更" },
+          { href: "/settings/profile", icon: UserCircle, label: "プロフィール設定", desc: "アイコン・学年・ロールを変更" },
           { href: "/settings/family", icon: Users, label: "家族連携", desc: "保護者と子どもを紐付け" },
         ].map(({ href, icon: Icon, label, desc }) => (
           <Link
@@ -272,6 +300,102 @@ export default function BillingPage() {
           </Link>
         ))}
       </div>
+
+      {/* ログアウト */}
+      <button
+        onClick={async () => { await logout(); router.push("/login"); }}
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-80"
+        style={{ background: "rgba(255,75,75,0.07)", color: "var(--color-error)", border: "1px solid rgba(255,75,75,0.15)" }}
+      >
+        <LogOut size={16} />
+        ログアウト
+      </button>
+
+      {/* 退会 */}
+      <div id="delete" className="text-center">
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          className="inline-flex items-center gap-1.5 text-xs py-2 transition-all hover:opacity-60"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          <AlertTriangle size={12} />
+          退会する
+        </button>
+      </div>
+
+      {/* 退会確認モーダル */}
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center pb-6 px-4"
+          style={{ background: "rgba(0,0,0,0.6)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) { setShowDeleteModal(false); setDeleteConfirmText(""); } }}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl p-6 space-y-4"
+            style={{ background: "var(--color-bg-primary)", border: "1px solid var(--color-bg-tertiary)" }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,75,75,0.1)" }}>
+                <AlertTriangle size={20} style={{ color: "var(--color-error)" }} />
+              </div>
+              <div>
+                <h2 className="font-display font-black text-base" style={{ color: "var(--color-text-primary)" }}>
+                  退会の確認
+                </h2>
+                <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  この操作は取り消せません
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl p-4 space-y-1.5 text-sm" style={{ background: "rgba(255,75,75,0.05)", border: "1px solid rgba(255,75,75,0.15)" }}>
+              <p style={{ color: "var(--color-error)" }} className="font-semibold text-xs">退会すると以下が完全に削除されます</p>
+              {["テスト・問題データ", "学習セッション・スケジュール・目標", "ランキング記録", "フォロー関係", "アカウント情報"].map((item) => (
+                <p key={item} className="text-xs flex items-center gap-1.5" style={{ color: "var(--color-text-secondary)" }}>
+                  <span style={{ color: "var(--color-error)" }}>✕</span> {item}
+                </p>
+              ))}
+            </div>
+
+            <div>
+              <p className="text-xs mb-2" style={{ color: "var(--color-text-muted)" }}>
+                確認のため <span className="font-bold" style={{ color: "var(--color-text-primary)" }}>「退会する」</span> と入力してください
+              </p>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="退会する"
+                className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+                style={{
+                  background: "var(--color-bg-secondary)",
+                  border: "2px solid var(--color-bg-tertiary)",
+                  color: "var(--color-text-primary)",
+                }}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(""); }}
+                className="flex-1 py-3 rounded-pill text-sm font-bold transition-all hover:opacity-80"
+                style={{ background: "var(--color-bg-secondary)", color: "var(--color-text-secondary)" }}
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== "退会する" || deleteLoading}
+                className="flex-1 py-3 rounded-pill text-sm font-bold text-white transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+                style={{ background: "var(--color-error)" }}
+              >
+                {deleteLoading ? <Loader2 size={16} className="animate-spin" /> : null}
+                {deleteLoading ? "処理中..." : "退会する"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
