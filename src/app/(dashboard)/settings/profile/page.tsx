@@ -11,8 +11,9 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { AvatarPicker } from "@/components/ui/AvatarPicker";
 import { Avatar } from "@/components/ui/Avatar";
 import { GRADES, GRADE_STAGES } from "@/lib/gamification/grades";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, GraduationCap, Users } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function ProfileSettingsPage() {
   const { currentUser } = useAuth();
@@ -27,6 +28,7 @@ export default function ProfileSettingsPage() {
   const [userData, setUserData] = useState<{
     name: string;
     grade?: string | null;
+    role?: "student" | "parent";
     avatarType?: "photo" | "emoji" | "default";
     avatarUrl?: string | null;
     avatarEmoji?: string | null;
@@ -35,6 +37,10 @@ export default function ProfileSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const [roleSaving, setRoleSaving] = useState(false);
+  const [roleSaved, setRoleSaved] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -46,6 +52,7 @@ export default function ProfileSettingsPage() {
       }
       setLoading(false);
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   async function handleSave(data: {
@@ -115,6 +122,26 @@ export default function ProfileSettingsPage() {
       setTimeout(() => setGradeSaved(false), 2000);
     } finally {
       setGradeSaving(false);
+    }
+  }
+
+  async function handleRoleSave(newRole: "student" | "parent") {
+    if (!currentUser || roleSaving || newRole === userData?.role) return;
+    const label = newRole === "parent" ? "保護者" : "生徒";
+    if (!confirm(`アカウント種別を「${label}」に変更します。\n画面構成が切り替わりますがよいですか？`)) return;
+    setRoleSaving(true);
+    try {
+      await upsertUser(currentUser.uid, { role: newRole });
+      setUserData((prev) => prev ? { ...prev, role: newRole } : prev);
+      setRoleSaved(true);
+      setTimeout(() => {
+        setRoleSaved(false);
+        // ロール変更後はレイアウトの再判定のためリロード
+        router.refresh();
+        router.replace(newRole === "parent" ? "/parent" : "/dashboard");
+      }, 1200);
+    } finally {
+      setRoleSaving(false);
     }
   }
 
@@ -239,6 +266,52 @@ export default function ProfileSettingsPage() {
         >
           {gradeSaving ? "保存中..." : gradeSaved ? "✓ 保存しました" : "学年を保存"}
         </button>
+      </div>
+
+      {/* アカウント種別 */}
+      <div
+        className="rounded-2xl p-5"
+        style={{ background: "var(--color-bg-primary)", border: "1px solid var(--color-bg-tertiary)", boxShadow: "var(--shadow-card)" }}
+      >
+        <h2 className="font-bold mb-1" style={{ color: "var(--color-text-primary)" }}>アカウント種別</h2>
+        <p className="text-xs mb-4" style={{ color: "var(--color-text-muted)" }}>
+          生徒は勉強・タイマー機能、保護者はお子さんの学習状況確認に特化した画面になります
+        </p>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          {([
+            { role: "student" as const, icon: <GraduationCap size={20} />, label: "生徒", desc: "勉強・AI・ランキング" },
+            { role: "parent" as const,  icon: <Users size={20} />,         label: "保護者", desc: "お子さんの見守り" },
+          ]).map(({ role, icon, label, desc }) => {
+            const isSelected = (userData?.role ?? "student") === role;
+            return (
+              <button
+                key={role}
+                onClick={() => handleRoleSave(role)}
+                disabled={roleSaving || isSelected}
+                className="flex flex-col items-center gap-2 py-4 px-3 rounded-2xl font-bold text-sm transition-all hover:opacity-80 disabled:cursor-default"
+                style={{
+                  background: isSelected ? "rgba(28,176,246,0.1)" : "var(--color-bg-secondary)",
+                  border: isSelected ? "2px solid var(--color-brand-blue)" : "2px solid transparent",
+                  color: isSelected ? "var(--color-brand-blue)" : "var(--color-text-secondary)",
+                }}
+              >
+                <span style={{ color: isSelected ? "var(--color-brand-blue)" : "var(--color-text-muted)" }}>{icon}</span>
+                <span>{label}</span>
+                <span className="text-xs font-normal" style={{ color: "var(--color-text-muted)" }}>{desc}</span>
+                {isSelected && (
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(28,176,246,0.15)", color: "var(--color-brand-blue)" }}>
+                    現在
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {roleSaved && (
+          <p className="text-xs text-center font-semibold py-2 rounded-xl" style={{ background: "rgba(88,204,2,0.1)", color: "var(--color-brand-green)" }}>
+            ✓ 変更しました。画面を切り替えます…
+          </p>
+        )}
       </div>
 
       {/* AvatarPicker */}
