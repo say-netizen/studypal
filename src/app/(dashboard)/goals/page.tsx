@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { getUserGoals, achieveGoal, deleteGoal, type GoalDoc } from "@/lib/firebase/schema";
 import { Target, Plus, CheckCircle2, Trash2, Star } from "lucide-react";
 import Link from "next/link";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 const SUBJECT_COLORS: Record<string, string> = {
   国語: "#9B5DE5", 数学: "#1CB0F6", 英語: "#58CC02", 理科: "#00C9A7", 社会: "#FF9600", その他: "#9CA3AF",
@@ -44,13 +45,7 @@ export default function GoalsPage() {
   const active = goals.filter((g) => !g.achieved);
   const done = goals.filter((g) => g.achieved);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: "var(--color-brand-blue)" }} />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   return (
     <div className="max-w-sm mx-auto px-4 py-6 space-y-5">

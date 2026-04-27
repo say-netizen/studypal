@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { getUser, type UserDoc } from "@/lib/firebase/schema";
 import { Check, Sparkles, Users, Loader2, Crown, ChevronRight, UserCircle, LogOut, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { useRouter } from "next/navigation";
 
 const PLANS = [
@@ -132,14 +133,7 @@ export default function BillingPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div
-          className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin"
-          style={{ borderColor: "var(--color-brand-blue)" }}
-        />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   const currentPlan = (userData?.plan ?? "free") as PlanId;

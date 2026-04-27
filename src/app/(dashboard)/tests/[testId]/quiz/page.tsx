@@ -15,6 +15,7 @@ import {
 } from "@/lib/firebase/schema";
 import { ArrowLeft, CheckCircle2, XCircle, ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 type AnswerState = "unanswered" | "correct" | "incorrect";
 
@@ -132,13 +133,7 @@ export default function QuizPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 size={32} className="animate-spin" style={{ color: "var(--color-brand-blue)" }} />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   if (questions.length === 0) {
     return (

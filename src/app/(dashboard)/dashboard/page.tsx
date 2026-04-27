@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { getUser, getUserTests, getSchedulesByDate, type UserDoc, type TestDoc, type ScheduleDoc } from "@/lib/firebase/schema";
 import { calcLevelProgress } from "@/lib/gamification/level";
 import { Avatar } from "@/components/ui/Avatar";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { format, differenceInDays } from "date-fns";
 import { ja } from "date-fns/locale";
 import {
@@ -243,16 +244,7 @@ export default function DashboardPage() {
   const streak = userData?.currentStreak ?? 0;
   const grade = userData?.grade ?? null;
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div
-          className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin"
-          style={{ borderColor: "var(--color-brand-blue)" }}
-        />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">

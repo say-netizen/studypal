@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { getTest, getUserTests, recordTestScore, type TestDoc } from "@/lib/firebase/schema";
 import { ArrowLeft, CheckCircle2, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -70,13 +71,7 @@ export default function TestScorePage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: "var(--color-brand-blue)" }} />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   if (!test) {
     return (

@@ -25,6 +25,7 @@ import {
   XCircle,
   Loader2,
 } from "lucide-react";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 const SUBJECT_COLORS: Record<string, string> = {
   国語: "#9B5DE5",
@@ -330,13 +331,7 @@ export default function ResultPage() {
 
   const displayQuestions = showOnlyWrong ? wrong : questions;
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 size={32} className="animate-spin" style={{ color: "var(--color-brand-blue)" }} />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   return (
     <div className="max-w-xl mx-auto px-4 py-6 space-y-5">

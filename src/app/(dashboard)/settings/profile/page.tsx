@@ -12,6 +12,7 @@ import { AvatarPicker } from "@/components/ui/AvatarPicker";
 import { Avatar } from "@/components/ui/Avatar";
 import { GRADES, GRADE_STAGES } from "@/lib/gamification/grades";
 import { ArrowLeft, GraduationCap, Users, Trash2 } from "lucide-react";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -146,13 +147,7 @@ export default function ProfileSettingsPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: "var(--color-brand-blue)" }} />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   return (
     <div className="max-w-md mx-auto px-4 py-6 space-y-6">

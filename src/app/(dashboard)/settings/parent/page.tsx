@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { getUser, upsertUser } from "@/lib/firebase/schema";
 import { ArrowLeft, Mail, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 export default function ParentSettingsPage() {
   const { currentUser } = useAuth();
@@ -45,13 +46,7 @@ export default function ParentSettingsPage() {
     await upsertUser(currentUser.uid, { weeklyReport: next });
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: "var(--color-brand-blue)" }} />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   if (userPlan !== "family") {
     return (

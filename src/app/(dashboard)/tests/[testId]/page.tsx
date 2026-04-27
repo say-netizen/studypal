@@ -14,6 +14,7 @@ import {
   type QuestionDoc,
 } from "@/lib/firebase/schema";
 import { differenceInDays, format } from "date-fns";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { ja } from "date-fns/locale";
 import {
   ArrowLeft,
@@ -133,16 +134,7 @@ export default function TestDetailPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div
-          className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin"
-          style={{ borderColor: "var(--color-brand-blue)" }}
-        />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   if (!test) {
     return (

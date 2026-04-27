@@ -23,6 +23,7 @@ import {
   TrendingDown, Minus, Star, Download, ChevronDown, ChevronUp, Loader2, Users,
 } from "lucide-react";
 import Link from "next/link";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 // ─── 型 ──────────────────────────────────────────────────────
 
@@ -350,13 +351,7 @@ export default function ParentPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: "var(--color-brand-blue)" }} />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   if (plan !== "family") {
     return (

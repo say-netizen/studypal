@@ -15,6 +15,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { FollowButton } from "@/components/social/FollowButton";
 import { ArrowLeft, Pencil, Flame, Star, Clock, BookOpen } from "lucide-react";
 import Link from "next/link";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { format, subDays, eachDayOfInterval } from "date-fns";
 import { ja } from "date-fns/locale";
 
@@ -97,13 +98,7 @@ export default function ProfilePage() {
     load();
   }, [uid, currentUser]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: "var(--color-brand-blue)" }} />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   if (error || !user) {
     return (

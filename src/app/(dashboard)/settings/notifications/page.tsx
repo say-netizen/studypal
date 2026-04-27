@@ -8,6 +8,7 @@ import { getUser, upsertUser } from "@/lib/firebase/schema";
 import { requestNotificationPermission, getFCMToken, saveFCMTokenToFirestore } from "@/lib/notifications/fcm";
 import { Bell, BellOff, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 type NotifSettings = {
   notificationsEnabled: boolean;
@@ -78,13 +79,7 @@ export default function NotificationsSettingsPage() {
     await saveSettings(updated);
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: "var(--color-brand-blue)" }} />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   const notifItems = [
     { key: "notifyDailyReminder" as const, label: "毎晩のリマインダー", desc: "今日まだ勉強してないときに通知" },

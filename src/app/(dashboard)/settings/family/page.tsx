@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { getUser } from "@/lib/firebase/schema";
 import { ArrowLeft, Copy, Check, Users, Unlink, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 interface LinkedChild {
   uid: string;
@@ -133,13 +134,7 @@ export default function FamilySettingsPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: "var(--color-brand-blue)" }} />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   return (
     <div className="max-w-md mx-auto px-4 py-6 space-y-6">

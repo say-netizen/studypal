@@ -73,6 +73,7 @@ export default function StudyPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(0);
   const savedElapsedRef = useRef<number>(0);
+  const notifiedRef = useRef<boolean>(false);
 
   // 今日の勉強スケジュールを取得
   useEffect(() => {
@@ -86,9 +87,16 @@ export default function StudyPage() {
   const tick = useCallback(() => {
     const newElapsed = savedElapsedRef.current + Math.floor((Date.now() - startTimeRef.current) / 1000);
     setElapsed(newElapsed);
-    // カウントダウン完了チェック
     if (countdownTotalRef.current > 0 && newElapsed >= countdownTotalRef.current) {
       setElapsed(countdownTotalRef.current);
+      // バックグラウンドでも通知
+      if (!notifiedRef.current && typeof Notification !== "undefined" && Notification.permission === "granted") {
+        notifiedRef.current = true;
+        new Notification("⏱️ 勉強時間終了！", {
+          body: `${Math.round(countdownTotalRef.current / 60)}分の集中、お疲れ様でした！`,
+          icon: "/icons/icon-192x192.png",
+        });
+      }
     }
   }, []);
 
@@ -105,6 +113,10 @@ export default function StudyPage() {
   }, [tick]);
 
   function startTimer() {
+    if (timerMode === "countdown" && typeof Notification !== "undefined" && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+    notifiedRef.current = false;
     startTimeRef.current = Date.now();
     savedElapsedRef.current = 0;
     countdownTotalRef.current = timerMode === "countdown" ? countdownMinutes * 60 : 0;
@@ -181,6 +193,7 @@ export default function StudyPage() {
     setResult(null);
     setSelectedSchedule(null);
     countdownTotalRef.current = 0;
+    notifiedRef.current = false;
   }
 
   useEffect(() => {
