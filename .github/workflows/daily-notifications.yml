@@ -1,0 +1,40 @@
+name: Daily Notifications
+
+on:
+  schedule:
+    - cron: '0 23 * * *'  # 毎朝08時JST（UTC23時）morning
+    - cron: '0 12 * * *'  # 毎晩21時JST（UTC12時）evening
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'morning or evening'
+        required: false
+        default: 'evening'
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine mode
+        id: mode
+        run: |
+          HOUR=$(date -u +%H)
+          if [ "$HOUR" = "23" ]; then
+            echo "mode=morning" >> $GITHUB_OUTPUT
+          else
+            echo "mode=${{ github.event.inputs.mode || 'evening' }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send reminder notifications
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://studypal-chi.vercel.app/api/cron/reminders?mode=${{ steps.mode.outputs.mode }}" \
+            && echo "reminders OK" || echo "reminders FAILED"
+
+      - name: Check test alerts
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://studypal-chi.vercel.app/api/cron/alerts" \
+            && echo "alerts OK" || echo "alerts FAILED"

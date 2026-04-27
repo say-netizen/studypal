@@ -209,3 +209,5 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ ok: true, sent, mode });
 }
+
+export { GET as POST };

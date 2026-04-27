@@ -1,0 +1,17 @@
+name: Weekly Report
+
+on:
+  schedule:
+    - cron: '0 11 * * 0'  # 毎週日曜20時JST（UTC11時）
+  workflow_dispatch:
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send weekly report
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://studypal-chi.vercel.app/api/cron/weekly-report" \
+            && echo "weekly-report OK" || echo "weekly-report FAILED"
