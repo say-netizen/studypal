@@ -20,9 +20,10 @@ const LINK_GROUPS = [
   {
     title: "法的情報",
     links: [
-      { href: "#", label: "利用規約" },
-      { href: "#", label: "プライバシーポリシー" },
-      { href: "#", label: "特定商取引法" },
+      { href: "/legal/terms", label: "利用規約" },
+      { href: "/legal/privacy", label: "プライバシーポリシー" },
+      { href: "/legal/tokusho", label: "特定商取引法" },
+      { href: "/legal/child-safety", label: "子どもの安全" },
     ],
   },
 ];
