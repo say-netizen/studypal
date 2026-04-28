@@ -13,7 +13,7 @@ import {
   type TestDoc,
   type QuestionDoc,
 } from "@/lib/firebase/schema";
-import { ArrowLeft, CheckCircle2, XCircle, ChevronRight, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
