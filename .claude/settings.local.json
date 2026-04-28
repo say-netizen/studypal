@@ -7,7 +7,8 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(grep -v \"^$\")",
-      "Bash(git commit -m 'chore: .env.local.example をgit管理から除外 *)"
+      "Bash(git commit -m 'chore: .env.local.example をgit管理から除外 *)",
+      "Bash(npx skills *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\miyata seiya\\Documents\\studypal-lp"
