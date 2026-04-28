@@ -25,13 +25,6 @@ export async function POST(req: NextRequest) {
   const plan = (userSnap.data()?.plan ?? "free") as "free" | "pro" | "family";
   const grade = (userSnap.data()?.grade as string | null) ?? "中2";
 
-  if (plan === "free") {
-    return NextResponse.json(
-      { error: "AI予想問題の生成はProプラン以上でご利用いただけます。", upgradeRequired: true },
-      { status: 403 }
-    );
-  }
-
   const { allowed, count, limit } = await checkLimit(uid, plan);
   if (!allowed) {
     return NextResponse.json(
