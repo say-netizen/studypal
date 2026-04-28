@@ -19,6 +19,7 @@ async function verifyToken(req: NextRequest): Promise<string | null> {
 // GET /api/parent/child?childUid=xxx
 // 保護者が子どものデータを取得。親子関係を検証してから返す。
 export async function GET(req: NextRequest) {
+  try {
   const uid = await verifyToken(req);
   if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -150,4 +151,9 @@ export async function GET(req: NextRequest) {
     },
     testTrends,
   });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[parent/child] error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }

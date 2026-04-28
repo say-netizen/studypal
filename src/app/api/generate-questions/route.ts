@@ -22,8 +22,19 @@ export async function POST(req: NextRequest) {
 
   // 2. プラン & 使用回数チェック
   const userSnap = await adminDb.collection("users").doc(uid).get();
-  const plan = (userSnap.data()?.plan ?? "free") as "free" | "pro" | "family";
-  const grade = (userSnap.data()?.grade as string | null) ?? "中2";
+  const userData = userSnap.data();
+  let plan = (userData?.plan ?? "free") as "free" | "pro" | "family";
+  const grade = (userData?.grade as string | null) ?? "中2";
+
+  // 子どもアカウントの場合、親のプランを確認する
+  if (plan === "free") {
+    const parentUid = userData?.parentUid as string | null;
+    if (parentUid) {
+      const parentSnap = await adminDb.collection("users").doc(parentUid).get();
+      const parentPlan = parentSnap.data()?.plan as string | undefined;
+      if (parentPlan === "family") plan = "family";
+    }
+  }
 
   const { allowed, count, limit } = await checkLimit(uid, plan);
   if (!allowed) {
