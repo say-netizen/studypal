@@ -18,17 +18,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "無効なトークンです" }, { status: 401 });
   }
 
+  // 親のプランを確認
   const userSnap = await adminDb.collection("users").doc(uid).get();
   if (userSnap.data()?.plan !== "family") {
     return NextResponse.json({ error: "Familyプランが必要です" }, { status: 403 });
   }
 
-  const payload = await generateWeeklyReportForUser(uid);
+  // targetUid: 子どものUID（指定なければ自分）
+  let targetUid = uid;
+  try {
+    const body = await req.json();
+    if (body.targetUid && typeof body.targetUid === "string") {
+      // 親子関係を検証
+      const childUids: string[] = (userSnap.data()?.childUids as string[]) ?? [];
+      if (childUids.includes(body.targetUid)) {
+        targetUid = body.targetUid;
+      }
+    }
+  } catch {
+    // body読み取り失敗は無視してデフォルト(uid)で続行
+  }
 
-  await adminDb
-    .collection("weeklyReports")
-    .doc(`${uid}_${payload.weekStr}`)
-    .set({ ...payload, savedAt: new Date() });
+  try {
+    const payload = await generateWeeklyReportForUser(targetUid);
 
-  return NextResponse.json({ ok: true, report: payload });
+    await adminDb
+      .collection("weeklyReports")
+      .doc(`${targetUid}_${payload.weekStr}`)
+      .set({ ...payload, savedAt: new Date() });
+
+    return NextResponse.json({ ok: true, report: payload });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[reports/generate] error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
