@@ -7,9 +7,9 @@ type Size = "sm" | "md" | "lg";
 
 const VARIANTS: Record<Variant, { bg: string; color: string; border?: string; shadow?: string }> = {
   primary: {
-    bg: "var(--color-brand-blue)",
+    bg: "var(--color-brand-primary)",
     color: "#fff",
-    shadow: "0 4px 15px rgba(28,176,246,0.4)",
+    shadow: "0 4px 15px rgba(160,82,45,0.4)",
   },
   success: {
     bg: "var(--color-brand-green)",

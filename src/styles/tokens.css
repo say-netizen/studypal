@@ -1,9 +1,16 @@
 /* StudyPal Design Tokens — synced with CLAUDE.md */
 
 :root {
-  /* Brand Colors */
+  /* ─── Brand Primary (Brown / Sienna) ─── */
+  --color-brand-primary:       #A0522D;
+  --color-brand-primary-dark:  #8B4423;
+  --color-brand-primary-soft:  rgba(160,82,45,0.12);
+  --color-brand-cream:         #FFF8F0;
+  --color-brand-tan:           #E8D5C4;
+
+  /* Brand Accent Colors */
   --color-brand-green:  #58CC02;
-  --color-brand-blue:   #1CB0F6;
+  --color-brand-blue:   var(--color-brand-primary); /* エイリアス: 旧コンポーネント互換 */
   --color-brand-purple: #9B5DE5;
   --color-brand-orange: #FF9600;
   --color-brand-red:    #FF4B4B;
@@ -59,8 +66,9 @@
   --shadow-card:       0 4px 20px rgba(0,0,0,0.08);
   --shadow-card-hover: 0 8px 40px rgba(0,0,0,0.15);
   --shadow-btn:        0 4px 12px rgba(88,204,2,0.4);
-  --shadow-btn-blue:   0 4px 12px rgba(28,176,246,0.4);
-  --shadow-glow:       0 0 30px rgba(88,204,2,0.3);
+  --shadow-btn-brown:  0 4px 12px rgba(160,82,45,0.4);
+  --shadow-btn-blue:   0 4px 12px rgba(160,82,45,0.4); /* エイリアス */
+  --shadow-glow:       0 0 30px rgba(160,82,45,0.3);
 
   /* Easing */
   --ease-bounce:  cubic-bezier(.34,1.56,.64,1);

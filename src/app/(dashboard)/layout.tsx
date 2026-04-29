@@ -17,6 +17,7 @@ import {
   Target,
   Users,
 } from "lucide-react";
+import { LogoIcon } from "@/components/ui/Logo";
 
 const STUDENT_NAV = [
   { href: "/dashboard",  icon: Home,           label: "ホーム" },
@@ -50,8 +51,8 @@ function NavItem({
       href={href}
       className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group"
       style={{
-        background: active ? "rgba(28,176,246,0.1)" : "transparent",
-        color: active ? "var(--color-brand-blue)" : "var(--color-text-secondary)",
+        background: active ? "var(--color-brand-primary-soft)" : "transparent",
+        color: active ? "var(--color-brand-primary)" : "var(--color-text-secondary)",
       }}
     >
       <Icon
@@ -62,7 +63,7 @@ function NavItem({
       {active && (
         <span
           className="ml-auto w-1.5 h-1.5 rounded-full"
-          style={{ background: "var(--color-brand-blue)" }}
+          style={{ background: "var(--color-brand-primary)" }}
         />
       )}
     </Link>
@@ -133,10 +134,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* ロゴ */}
         <div className="px-5 py-5 border-b" style={{ borderColor: "var(--color-bg-tertiary)" }}>
           <Link href={homeHref} className="flex items-center gap-2">
-            <span className="text-2xl">📚</span>
+            <div style={{ width: 32, height: 32, background: "var(--color-brand-cream)", border: "2px solid var(--color-brand-tan)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <LogoIcon size={20} />
+            </div>
             <span
               className="text-lg font-display font-black"
-              style={{ color: "var(--color-brand-green)" }}
+              style={{ color: "var(--color-brand-primary)" }}
             >
               StudyPal
             </span>
@@ -183,7 +186,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-              style={{ background: "var(--color-brand-blue)" }}
+              style={{ background: "var(--color-brand-primary)" }}
             >
               {initial}
             </div>
@@ -196,7 +199,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </p>
               <p
                 className="text-xs truncate"
-                style={{ color: "var(--color-brand-blue)" }}
+                style={{ color: "var(--color-brand-primary)" }}
               >
                 プロフィールを見る →
               </p>
@@ -236,7 +239,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               key={href}
               href={href}
               className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all duration-150"
-              style={{ color: active ? "var(--color-brand-blue)" : "var(--color-text-muted)" }}
+              style={{ color: active ? "var(--color-brand-primary)" : "var(--color-text-muted)" }}
             >
               <Icon size={22} />
               <span className="text-[10px] font-semibold">{label}</span>

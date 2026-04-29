@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     "小学5年生〜中学3年生向けのAI学習アプリ。Duolingo×Linearの体験で、毎日続けたくなる学びを。",
   keywords: ["学習アプリ", "AI", "小学生", "中学生", "ゲーミフィケーション", "StudyPal"],
   manifest: "/manifest.json",
-  themeColor: "#1CB0F6",
+  themeColor: "#A0522D",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "StudyPal" },
   openGraph: {
     title: "StudyPal — AIで楽しく学ぶ",

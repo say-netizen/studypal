@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
+import { LogoIcon } from "@/components/ui/Logo";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -54,25 +55,25 @@ export function Navbar() {
               fontFamily: "var(--font-display)",
               fontWeight: 800,
               fontSize: "1.375rem",
-              color: "var(--color-text-primary)",
+              color: "var(--color-brand-primary)",
               textDecoration: "none",
               whiteSpace: "nowrap",
             }}
           >
             <div
               style={{
-                width: "34px",
-                height: "34px",
-                background: "linear-gradient(135deg,#1CB0F6,#9B5DE5)",
+                width: "36px",
+                height: "36px",
+                background: "var(--color-brand-cream)",
+                border: "2px solid var(--color-brand-tan)",
                 borderRadius: "var(--radius-md)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "18px",
                 flexShrink: 0,
               }}
             >
-              📚
+              <LogoIcon size={22} />
             </div>
             StudyPal
           </Link>
