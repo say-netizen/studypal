@@ -9,6 +9,8 @@ import { getUser, getUserTests, getSchedulesByDate, type UserDoc, type TestDoc, 
 import { calcLevelProgress } from "@/lib/gamification/level";
 import { Avatar } from "@/components/ui/Avatar";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
+import { OnboardingChecklist } from "@/components/ui/OnboardingChecklist";
+import { PwaInstallBanner } from "@/components/ui/PwaInstallBanner";
 import { format, differenceInDays } from "date-fns";
 import { ja } from "date-fns/locale";
 import {
@@ -289,6 +291,9 @@ export default function DashboardPage() {
         </Link>
       </div>
 
+      {/* ── Onboarding チェックリスト（新規ユーザー向け） ── */}
+      <OnboardingChecklist hasTests={tests.length > 0} />
+
       {/* ── XP / レベルバー ── */}
       <XpLevelBar totalXp={totalXp} grade={grade} />
 
@@ -410,6 +415,9 @@ export default function DashboardPage() {
         </div>
         <ChevronRight size={18} style={{ color: "var(--color-text-muted)" }} />
       </a>
+
+      {/* PWAインストールバナー */}
+      <PwaInstallBanner />
     </div>
   );
 }

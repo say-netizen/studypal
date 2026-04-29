@@ -30,6 +30,9 @@ export const metadata: Metadata = {
   description:
     "小学5年生〜中学3年生向けのAI学習アプリ。Duolingo×Linearの体験で、毎日続けたくなる学びを。",
   keywords: ["学習アプリ", "AI", "小学生", "中学生", "ゲーミフィケーション", "StudyPal"],
+  manifest: "/manifest.json",
+  themeColor: "#1CB0F6",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "StudyPal" },
   openGraph: {
     title: "StudyPal — AIで楽しく学ぶ",
     description: "毎日続けたくなるAI学習体験",
@@ -44,8 +47,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={`${nunito.variable} ${inter.variable}`}>
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+      </head>
       <body className="font-body bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] antialiased">
         <ClientProviders>{children}</ClientProviders>
+        <script dangerouslySetInnerHTML={{ __html: `
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+          }
+        `}} />
       </body>
     </html>
   );

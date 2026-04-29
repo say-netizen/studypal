@@ -461,7 +461,7 @@ export default function StudyPage() {
                 strokeWidth="10"
                 strokeLinecap="round"
                 strokeDasharray={`${2 * Math.PI * 88 * 0.25} ${2 * Math.PI * 88 * 0.75}`}
-                transform="rotate(-90 100 100)"
+                style={{ transformOrigin: "100px 100px", animation: "spinRing 1.5s linear infinite" }}
               />
             )}
           </svg>
