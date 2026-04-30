@@ -1,5 +1,7 @@
 "use client";
 
+import { LogoIcon } from "@/components/ui/Logo";
+
 const LINK_GROUPS = [
   {
     title: "プロダクト",
@@ -30,7 +32,7 @@ const LINK_GROUPS = [
 
 export function Footer() {
   return (
-    <footer style={{ background: "#0A0A0B", padding: "64px 24px 40px" }}>
+    <footer style={{ background: "#0A0A0B", padding: "clamp(48px,7vw,64px) clamp(16px,4vw,24px) 40px" }}>
       <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
         {/* 上段 */}
         <div
@@ -40,7 +42,9 @@ export function Footer() {
           {/* ブランド */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.25rem", color: "#fff", marginBottom: "12px" }}>
-              <div style={{ width: "32px", height: "32px", background: "linear-gradient(135deg,var(--color-brand-primary),#9B5DE5)", borderRadius: "var(--radius-md)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>📚</div>
+              <div style={{ width: "32px", height: "32px", background: "var(--color-brand-cream)", border: "2px solid var(--color-brand-tan)", borderRadius: "var(--radius-md)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <LogoIcon size={20} />
+              </div>
               StudyPal
             </div>
             <div style={{ fontSize: "0.9rem", color: "rgba(255,255,255,.4)", maxWidth: "200px", lineHeight: 1.6 }}>
@@ -74,7 +78,7 @@ export function Footer() {
         {/* 下段 */}
         <div style={{ borderTop: "1px solid rgba(255,255,255,.07)", paddingTop: "32px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
           <div style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,.25)" }}>© 2026 StudyPal. All rights reserved.</div>
-          <div style={{ display: "flex", gap: "12px" }}>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }} className="footer-badges">
             <span style={{ fontSize: "0.75rem", fontWeight: 600, padding: "4px 12px", borderRadius: "var(--radius-pill)", background: "rgba(255,255,255,.06)", color: "rgba(255,255,255,.4)", border: "1px solid rgba(255,255,255,.08)" }}>🚀 2026年夏リリース予定</span>
             <span style={{ fontSize: "0.75rem", fontWeight: 600, padding: "4px 12px", borderRadius: "var(--radius-pill)", background: "rgba(255,255,255,.06)", color: "rgba(255,255,255,.4)", border: "1px solid rgba(255,255,255,.08)" }}>子ども安心アプリ</span>
           </div>
@@ -82,7 +86,8 @@ export function Footer() {
       </div>
 
       <style>{`
-        @media(max-width:768px){ .footer-top-responsive{flex-direction:column;gap:32px} }
+        @media(max-width:768px){ .footer-top-responsive{flex-direction:column;gap:28px} }
+        @media(max-width:480px){ .footer-badges{flex-direction:column;align-items:flex-start} }
       `}</style>
     </footer>
   );

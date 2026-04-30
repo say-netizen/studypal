@@ -18,7 +18,7 @@ export function LoadingScreen({ fullPage = false }: { fullPage?: boolean }) {
           <circle
             cx="32" cy="32" r="28"
             fill="none"
-            stroke="var(--color-brand-blue)"
+            stroke="var(--color-brand-primary)"
             strokeWidth="5"
             strokeLinecap="round"
             strokeDasharray={`${2 * Math.PI * 28 * 0.25} ${2 * Math.PI * 28 * 0.75}`}
@@ -37,7 +37,7 @@ export function LoadingScreen({ fullPage = false }: { fullPage?: boolean }) {
             key={i}
             className="w-1.5 h-1.5 rounded-full"
             style={{
-              background: "var(--color-brand-blue)",
+              background: "var(--color-brand-primary)",
               opacity: 0.4,
               animation: `dotPulse 1.2s ${i * 0.2}s ease-in-out infinite`,
             }}
