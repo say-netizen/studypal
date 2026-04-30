@@ -10,11 +10,11 @@ type AvatarProps = {
 };
 
 const GRADIENT_COLORS = [
-  "linear-gradient(135deg,#1CB0F6,#9B5DE5)",
+  "linear-gradient(135deg,var(--color-brand-primary),#9B5DE5)",
   "linear-gradient(135deg,#58CC02,#00C9A7)",
   "linear-gradient(135deg,#FFD700,#FF9600)",
   "linear-gradient(135deg,#FF6BB3,#FF9600)",
-  "linear-gradient(135deg,#9B5DE5,#1CB0F6)",
+  "linear-gradient(135deg,#9B5DE5,var(--color-brand-primary))",
 ];
 
 function getGradient(name: string) {
@@ -57,7 +57,7 @@ export function Avatar({
           width: `${size}px`,
           height: `${size}px`,
           borderRadius: "50%",
-          background: avatarColor ?? "#1CB0F6",
+          background: avatarColor ?? "var(--color-brand-primary)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
             <div style="text-align:center">
               <a
                 href="https://studypal-chi.vercel.app/parent"
-                style="display:inline-block;background:linear-gradient(135deg,#9B5DE5,#1CB0F6);color:white;font-weight:700;font-size:14px;padding:14px 28px;border-radius:9999px;text-decoration:none"
+                style="display:inline-block;background:linear-gradient(135deg,#9B5DE5,var(--color-brand-primary));color:white;font-weight:700;font-size:14px;padding:14px 28px;border-radius:9999px;text-decoration:none"
               >
                 保護者ダッシュボードで確認 →
               </a>

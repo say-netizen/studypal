@@ -256,7 +256,7 @@ export default function FamilySettingsPage() {
               <Link
                 href="/settings/billing"
                 className="block w-full py-3 rounded-pill font-bold text-white text-center transition-all hover:opacity-80"
-                style={{ background: "linear-gradient(135deg, #9B5DE5, #1CB0F6)" }}
+                style={{ background: "linear-gradient(135deg, #9B5DE5, var(--color-brand-primary))" }}
               >
                 Familyプランを開始 — ¥780/月
               </Link>

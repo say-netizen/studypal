@@ -24,7 +24,7 @@ const STATUS_STYLES: Record<BadgeStatus, { bg: string; color: string; border: st
     border: "1px solid rgba(255,150,0,0.3)",
   },
   ai: {
-    bg: "linear-gradient(135deg,#9B5DE5,#1CB0F6)",
+    bg: "linear-gradient(135deg,#9B5DE5,var(--color-brand-primary))",
     color: "#fff",
     border: "none",
   },

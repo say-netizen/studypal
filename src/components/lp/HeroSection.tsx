@@ -119,7 +119,7 @@ export function HeroSection() {
             <br />
             <span
               style={{
-                background: "linear-gradient(135deg,#1CB0F6 0%,#9B5DE5 50%,#58CC02 100%)",
+                background: "linear-gradient(135deg,var(--color-brand-primary) 0%,#9B5DE5 50%,#58CC02 100%)",
                 backgroundSize: "200% auto",
                 WebkitBackgroundClip: "text",
                 backgroundClip: "text",
@@ -257,7 +257,7 @@ export function HeroSection() {
             <div style={{ padding: "10px 14px", display: "flex", flexDirection: "column", gap: "8px" }}>
               {[
                 { medal: "🥇", name: "たろう", xp: "3,840 XP", bg: "linear-gradient(135deg,#FFD700,#FF9600)", highlight: "rgba(255,217,0,.1)" },
-                { medal: "🥈", name: "はなこ", xp: "3,210 XP", bg: "linear-gradient(135deg,#1CB0F6,#9B5DE5)", highlight: "" },
+                { medal: "🥈", name: "はなこ", xp: "3,210 XP", bg: "linear-gradient(135deg,var(--color-brand-primary),#9B5DE5)", highlight: "" },
                 { medal: "🥉", name: "じろう", xp: "2,980 XP", bg: "linear-gradient(135deg,#58CC02,#00C9A7)", highlight: "" },
                 { medal: "12", name: "あなた", xp: "1,240 XP", bg: "linear-gradient(135deg,#FF6BB3,#FF9600)", highlight: "rgba(28,176,246,.1)", isMe: true },
               ].map(({ medal, name, xp, bg, highlight, isMe }) => (
@@ -366,9 +366,9 @@ function ChatBubble({ type, text }: { type: "user" | "ai"; text: React.ReactNode
     <div style={{ maxWidth: "82%", padding: "10px 14px", borderRadius: "var(--radius-lg)", fontSize: "0.8125rem", lineHeight: 1.5, alignSelf: isUser ? "flex-end" : "flex-start", background: isUser ? "var(--color-brand-blue)" : "var(--color-bg-secondary)", color: isUser ? "#fff" : "var(--color-text-primary)" }}>
       {!isUser && (
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-          <div style={{ width: "20px", height: "20px", background: "linear-gradient(135deg,#1CB0F6,#9B5DE5)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: "#fff", fontWeight: 700 }}>AI</div>
+          <div style={{ width: "20px", height: "20px", background: "linear-gradient(135deg,var(--color-brand-primary),#9B5DE5)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: "#fff", fontWeight: 700 }}>AI</div>
           <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: "var(--color-brand-blue)" }}>StudyPal AI</span>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", background: "linear-gradient(135deg,#9B5DE5,#1CB0F6)", color: "#fff", fontSize: "0.625rem", fontWeight: 700, padding: "1px 6px", borderRadius: "var(--radius-pill)" }}>✨ AI</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", background: "linear-gradient(135deg,#9B5DE5,var(--color-brand-primary))", color: "#fff", fontSize: "0.625rem", fontWeight: 700, padding: "1px 6px", borderRadius: "var(--radius-pill)" }}>✨ AI</span>
         </div>
       )}
       {text}

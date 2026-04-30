@@ -13,7 +13,7 @@ type EventType = "study" | "club" | "event" | "test";
 
 const EVENT_TYPES: { value: EventType; label: string; icon: string; color: string }[] = [
   { value: "study", label: "勉強",   icon: "📖", color: "#58CC02" },
-  { value: "club",  label: "部活",   icon: "⚽", color: "#1CB0F6" },
+  { value: "club",  label: "部活",   icon: "⚽", color: "var(--color-brand-primary)" },
   { value: "event", label: "予定",   icon: "🎉", color: "#FF9600" },
   { value: "test",  label: "テスト", icon: "📝", color: "#FF4B4B" },
 ];
@@ -45,7 +45,7 @@ export default function NewEventPage() {
   const [saving, setSaving]     = useState(false);
   const [error, setError]       = useState("");
 
-  const activeColor = EVENT_TYPES.find((t) => t.value === type)?.color ?? "#1CB0F6";
+  const activeColor = EVENT_TYPES.find((t) => t.value === type)?.color ?? "var(--color-brand-primary)";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

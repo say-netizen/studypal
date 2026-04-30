@@ -82,6 +82,6 @@ export function levelTier(level: number): { color: string; label: string } {
   if (level <= 30) return { color: "#A8A9AD", label: "Silver" };
   if (level <= 50) return { color: "#FFD700", label: "Gold" };
   if (level <= 70) return { color: "#00C9A7", label: "Platinum" };
-  if (level <= 85) return { color: "#1CB0F6", label: "Diamond" };
+  if (level <= 85) return { color: "var(--color-brand-primary)", label: "Diamond" };
   return { color: "#9B5DE5", label: "Master" };
 }

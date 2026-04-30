@@ -23,7 +23,7 @@ const DAYS = 7;
 
 const SUBJECT_COLORS: Record<string, string> = {
   国語: "#FF6BB3",
-  数学: "#1CB0F6",
+  数学: "var(--color-brand-primary)",
   英語: "#58CC02",
   理科: "#00C9A7",
   社会: "#FF9600",
@@ -143,7 +143,7 @@ export default function ProfilePage() {
     level <= 70 ? "Platinum" : level <= 85 ? "Diamond" : "Master";
   const tierColor =
     level <= 15 ? "#CD7F32" : level <= 30 ? "#A8A9AD" : level <= 50 ? "#FFD700" :
-    level <= 70 ? "#00C9A7" : level <= 85 ? "#1CB0F6" : "#9B5DE5";
+    level <= 70 ? "#00C9A7" : level <= 85 ? "var(--color-brand-primary)" : "#9B5DE5";
 
   return (
     <div className="max-w-md mx-auto" style={{ background: "var(--color-bg-secondary)", minHeight: "100vh" }}>
@@ -182,7 +182,7 @@ export default function ProfilePage() {
           <div className="flex-shrink-0">
             <div
               className="rounded-full p-0.5"
-              style={{ background: "linear-gradient(135deg, #58CC02, #1CB0F6, #9B5DE5)" }}
+              style={{ background: "linear-gradient(135deg, #58CC02, var(--color-brand-primary), #9B5DE5)" }}
             >
               <div className="rounded-full p-0.5" style={{ background: "var(--color-bg-primary)" }}>
                 <Avatar

@@ -17,7 +17,7 @@ function buildEmailHtml(report: ReportPayload): string {
 <div style="max-width:500px;margin:0 auto">
 
   <!-- ヘッダー -->
-  <div style="background:linear-gradient(135deg,#58CC02,#1CB0F6);border-radius:20px;padding:28px;text-align:center;margin-bottom:16px">
+  <div style="background:linear-gradient(135deg,#58CC02,var(--color-brand-primary));border-radius:20px;padding:28px;text-align:center;margin-bottom:16px">
     <p style="color:rgba(255,255,255,0.8);font-size:13px;margin:0 0 4px">今週の学習レポート</p>
     <h1 style="color:#fff;font-size:22px;font-weight:900;margin:0">${childName}さんのレポート 📊</h1>
   </div>
@@ -25,7 +25,7 @@ function buildEmailHtml(report: ReportPayload): string {
   <!-- AIコメント -->
   ${aiComment ? `
   <div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:12px;border:1px solid rgba(28,176,246,0.2)">
-    <p style="font-size:12px;color:#1CB0F6;font-weight:700;margin:0 0 8px">✨ AIアシスタントからのコメント</p>
+    <p style="font-size:12px;color:var(--color-brand-primary);font-weight:700;margin:0 0 8px">✨ AIアシスタントからのコメント</p>
     <p style="font-size:13px;color:#1A1A1A;line-height:1.7;margin:0">${aiComment}</p>
   </div>` : ""}
 
@@ -103,7 +103,7 @@ function buildEmailHtml(report: ReportPayload): string {
 
   <!-- フッター -->
   <p style="text-align:center;font-size:11px;color:#9CA3AF;margin-top:20px">
-    StudyPal 週次レポート · <a href="https://studypal-chi.vercel.app/parent" style="color:#1CB0F6">ダッシュボードで詳細を見る</a>
+    StudyPal 週次レポート · <a href="https://studypal-chi.vercel.app/parent" style="color:var(--color-brand-primary)">ダッシュボードで詳細を見る</a>
   </p>
 </div>
 </body>

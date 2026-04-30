@@ -62,7 +62,7 @@ export function RankingCard({ entries, currentUid }: RankingCardProps) {
             rank === 1 ? "linear-gradient(135deg,#FFD700,#FFA500)"
             : rank === 2 ? "linear-gradient(135deg,#C0C0C0,#808080)"
             : rank === 3 ? "linear-gradient(135deg,#CD7F32,#A0522D)"
-            : isMe ? "linear-gradient(135deg,#1CB0F6,#9B5DE5)"
+            : isMe ? "linear-gradient(135deg,var(--color-brand-primary),#9B5DE5)"
             : undefined;
 
           return (

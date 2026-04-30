@@ -386,7 +386,7 @@ export default function ParentPage() {
         <Link
           href="/settings/billing"
           className="w-full py-3.5 rounded-pill font-bold text-white text-center flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5"
-          style={{ background: "linear-gradient(135deg, #9B5DE5, #1CB0F6)", boxShadow: "0 4px 15px rgba(155,93,229,0.35)" }}
+          style={{ background: "linear-gradient(135deg, #9B5DE5, var(--color-brand-primary))", boxShadow: "0 4px 15px rgba(155,93,229,0.35)" }}
         >
           <Sparkles size={16} />
           Familyプランを開始 — ¥780/月
@@ -685,7 +685,7 @@ export default function ParentPage() {
                     onClick={handleGenerateReport}
                     disabled={saving}
                     className="shrink-0 flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-pill transition-all hover:opacity-80 disabled:opacity-50"
-                    style={{ background: "linear-gradient(135deg, #9B5DE5, #1CB0F6)", color: "#fff" }}
+                    style={{ background: "linear-gradient(135deg, #9B5DE5, var(--color-brand-primary))", color: "#fff" }}
                   >
                     {saving ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
                     {saving ? "生成中..." : "生成・保存"}

@@ -40,7 +40,7 @@ export function Footer() {
           {/* ブランド */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.25rem", color: "#fff", marginBottom: "12px" }}>
-              <div style={{ width: "32px", height: "32px", background: "linear-gradient(135deg,#1CB0F6,#9B5DE5)", borderRadius: "var(--radius-md)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>📚</div>
+              <div style={{ width: "32px", height: "32px", background: "linear-gradient(135deg,var(--color-brand-primary),#9B5DE5)", borderRadius: "var(--radius-md)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>📚</div>
               StudyPal
             </div>
             <div style={{ fontSize: "0.9rem", color: "rgba(255,255,255,.4)", maxWidth: "200px", lineHeight: 1.6 }}>

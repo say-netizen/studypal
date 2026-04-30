@@ -14,7 +14,7 @@ const SUBJECTS = ["国語", "数学", "英語", "理科", "社会"];
 
 const SUBJECT_COLORS: Record<string, string> = {
   国語: "#9B5DE5",
-  数学: "#1CB0F6",
+  数学: "var(--color-brand-primary)",
   英語: "#58CC02",
   理科: "#00C9A7",
   社会: "#FF9600",

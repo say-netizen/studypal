@@ -101,7 +101,7 @@ export function PricingSection() {
               onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = plan.featured ? "scale(1.04)" : "none"; (e.currentTarget as HTMLDivElement).style.boxShadow = plan.featured ? "var(--shadow-brand-blue)" : "none"; }}
             >
               {plan.featured && (
-                <div style={{ position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg,#1CB0F6,#9B5DE5)", color: "#fff", fontSize: "0.8125rem", fontWeight: 700, padding: "4px 16px", borderRadius: "var(--radius-pill)", whiteSpace: "nowrap" }}>
+                <div style={{ position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg,var(--color-brand-primary),#9B5DE5)", color: "#fff", fontSize: "0.8125rem", fontWeight: 700, padding: "4px 16px", borderRadius: "var(--radius-pill)", whiteSpace: "nowrap" }}>
                   🏆 一番人気
                 </div>
               )}

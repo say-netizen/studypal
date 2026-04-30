@@ -9,7 +9,7 @@ import Link from "next/link";
 
 const SUBJECTS = ["国語", "数学", "英語", "理科", "社会", "その他"];
 const SUBJECT_COLORS: Record<string, string> = {
-  国語: "#9B5DE5", 数学: "#1CB0F6", 英語: "#58CC02", 理科: "#00C9A7", 社会: "#FF9600", その他: "#9CA3AF",
+  国語: "#9B5DE5", 数学: "var(--color-brand-primary)", 英語: "#58CC02", 理科: "#00C9A7", 社会: "#FF9600", その他: "#9CA3AF",
 };
 const SCORE_PRESETS = [60, 70, 75, 80, 85, 90, 95, 100];
 
@@ -141,7 +141,7 @@ export default function NewGoalPage() {
         onClick={handleSave}
         disabled={!subject || saving}
         className="w-full py-3.5 rounded-pill font-bold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 disabled:opacity-60"
-        style={{ background: subject ? color : "var(--color-brand-blue)", boxShadow: `0 4px 12px ${subject ? color : "#1CB0F6"}40` }}
+        style={{ background: subject ? color : "var(--color-brand-blue)", boxShadow: `0 4px 12px ${subject ? color : "var(--color-brand-primary)"}40` }}
       >
         {saving ? (
           <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin border-white" />

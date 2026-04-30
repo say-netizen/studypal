@@ -9,29 +9,37 @@ export function LogoIcon({ size = 32, color = "var(--color-brand-primary)", clas
     <svg
       width={size}
       height={size}
-      viewBox="0 0 64 64"
+      viewBox="0 0 80 80"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      {/* 角帽子（モルタルボード） — 上の平らな板 */}
-      <rect x="8" y="14" width="48" height="9" rx="2" fill={color} />
-      {/* 帽子の頭部分 */}
-      <rect x="27" y="23" width="10" height="7" fill={color} />
-      {/* タッセル紐 */}
-      <line x1="56" y1="18.5" x2="60" y2="28" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
-      {/* タッセル先端 */}
-      <circle cx="60" cy="31" r="3" fill={color} />
+      {/* 角帽子 — 上の平らな板（広め） */}
+      <rect x="16" y="4" width="44" height="19" rx="2.5" fill={color} />
+      {/* 角帽子 — ブリム */}
+      <rect x="9" y="21" width="58" height="10" rx="3" fill={color} />
 
-      {/* 顔 */}
-      <circle cx="32" cy="40" r="11" fill={color} />
+      {/* 顔（円） */}
+      <circle cx="38" cy="50" r="18" fill={color} />
       {/* スマイル（白抜き） */}
-      <path d="M 24 42 Q 32 50 40 42" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path
+        d="M29 55 Q38 66 47 55"
+        stroke="white"
+        strokeWidth="3.5"
+        fill="none"
+        strokeLinecap="round"
+      />
 
-      {/* ガウン/体 */}
-      <path d="M 10 58 L 22 51 L 32 56 L 42 51 L 54 58 L 50 64 L 14 64 Z" fill={color} />
-      {/* Vネック（白） */}
-      <path d="M 32 52 L 23 58 L 41 58 Z" fill="white" />
+      {/* 卒業ガウン — Vネックラペル + ボディ */}
+      <path
+        d="M9 80 L20 63 L30 56 L38 67 L46 56 L56 63 L67 80 Z"
+        fill={color}
+      />
+
+      {/* タッセル紐（顔の上に重ねて表示） */}
+      <rect x="57" y="4" width="2.5" height="36" rx="1.25" fill={color} />
+      {/* タッセル先端 */}
+      <circle cx="58.25" cy="43" r="4.5" fill={color} />
     </svg>
   );
 }

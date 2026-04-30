@@ -31,7 +31,7 @@ import {
 
 const SUBJECT_COLORS: Record<string, string> = {
   国語: "#9B5DE5",
-  数学: "#1CB0F6",
+  数学: "var(--color-brand-primary)",
   英語: "#58CC02",
   理科: "#00C9A7",
   社会: "#FF9600",
@@ -288,7 +288,7 @@ export default function TestDetailPage() {
               href="/settings/billing"
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-pill font-bold text-white transition-all hover:-translate-y-0.5"
               style={{
-                background: "linear-gradient(135deg, #9B5DE5, #1CB0F6)",
+                background: "linear-gradient(135deg, #9B5DE5, var(--color-brand-primary))",
                 boxShadow: "0 4px 15px rgba(155,93,229,0.35)",
               }}
             >
@@ -343,7 +343,7 @@ export default function TestDetailPage() {
                   disabled={genStatus === "loading"}
                   className="w-full py-3 rounded-pill font-bold text-white flex items-center justify-center gap-2 transition-all duration-120 disabled:opacity-70 hover:-translate-y-0.5"
                   style={{
-                    background: "linear-gradient(135deg, #9B5DE5, #1CB0F6)",
+                    background: "linear-gradient(135deg, #9B5DE5, var(--color-brand-primary))",
                     boxShadow: "0 4px 15px rgba(155,93,229,0.35)",
                   }}
                 >

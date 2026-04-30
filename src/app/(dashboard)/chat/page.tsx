@@ -43,7 +43,7 @@ type QuizStep = "form" | "generating" | "quiz" | "result";
 
 const SUBJECTS = ["国語", "数学", "英語", "理科", "社会"];
 const SUBJECT_COLORS: Record<string, string> = {
-  国語: "#9B5DE5", 数学: "#1CB0F6", 英語: "#58CC02", 理科: "#00C9A7", 社会: "#FF9600",
+  国語: "#9B5DE5", 数学: "var(--color-brand-primary)", 英語: "#58CC02", 理科: "#00C9A7", 社会: "#FF9600",
 };
 const TYPE_LABELS: Record<string, string> = {
   multiple: "四択", fill: "穴埋め", description: "記述",
@@ -338,7 +338,7 @@ export default function TutorPage() {
         <Link
           href="/settings/billing"
           className="w-full py-3.5 rounded-pill font-bold text-white text-center flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5"
-          style={{ background: "linear-gradient(135deg, #9B5DE5, #1CB0F6)", boxShadow: "0 4px 15px rgba(155,93,229,0.35)" }}
+          style={{ background: "linear-gradient(135deg, #9B5DE5, var(--color-brand-primary))", boxShadow: "0 4px 15px rgba(155,93,229,0.35)" }}
         >
           <Sparkles size={16} />
           Proプランを開始 — ¥480/月
@@ -632,7 +632,7 @@ export default function TutorPage() {
                   onClick={handleGenerate}
                   disabled={!quizSubject || !quizRange.trim()}
                   className="w-full py-3.5 rounded-pill font-bold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:transform-none"
-                  style={{ background: "linear-gradient(135deg, #9B5DE5, #1CB0F6)", boxShadow: "0 4px 15px rgba(155,93,229,0.35)" }}
+                  style={{ background: "linear-gradient(135deg, #9B5DE5, var(--color-brand-primary))", boxShadow: "0 4px 15px rgba(155,93,229,0.35)" }}
                 >
                   <Sparkles size={16} />
                   予想問題を10問生成する
@@ -671,7 +671,7 @@ export default function TutorPage() {
                 <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: "var(--color-bg-tertiary)" }}>
                   <div
                     className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${((currentQ + 1) / questions.length) * 100}%`, background: "linear-gradient(90deg, #9B5DE5, #1CB0F6)" }}
+                    style={{ width: `${((currentQ + 1) / questions.length) * 100}%`, background: "linear-gradient(90deg, #9B5DE5, var(--color-brand-primary))" }}
                   />
                 </div>
                 <span className="text-xs font-bold flex-shrink-0" style={{ color: "var(--color-text-secondary)" }}>

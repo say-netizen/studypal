@@ -30,7 +30,7 @@ type EventType = ScheduleDoc["type"];
 
 const TYPE_COLORS: Record<EventType, string> = {
   test:  "#FF4B4B",
-  club:  "#1CB0F6",
+  club:  "var(--color-brand-primary)",
   study: "#58CC02",
   event: "#FF9600",
 };

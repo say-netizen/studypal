@@ -33,7 +33,7 @@ const PLANS = [
     price: "¥480",
     period: "/月",
     icon: "⭐",
-    color: "#1CB0F6",
+    color: "var(--color-brand-primary)",
     popular: true,
     features: [
       "AI予想問題生成: 無制限",

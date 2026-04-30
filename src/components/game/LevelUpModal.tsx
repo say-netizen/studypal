@@ -12,7 +12,7 @@ function levelTier(level: number): { label: string; color: string; bg: string } 
   if (level <= 10) return { label: "Bronze", color: "#CD7F32", bg: "linear-gradient(135deg,#CD7F32,#A0522D)" };
   if (level <= 20) return { label: "Silver", color: "#C0C0C0", bg: "linear-gradient(135deg,#C0C0C0,#808080)" };
   if (level <= 30) return { label: "Gold", color: "#FFD700", bg: "linear-gradient(135deg,#FFD700,#FFA500)" };
-  return { label: "Diamond", color: "var(--color-brand-blue)", bg: "linear-gradient(135deg,#1CB0F6,#9B5DE5)" };
+  return { label: "Diamond", color: "var(--color-brand-blue)", bg: "linear-gradient(135deg,var(--color-brand-primary),#9B5DE5)" };
 }
 
 export function LevelUpModal({ level, onClose }: LevelUpModalProps) {
@@ -27,7 +27,7 @@ export function LevelUpModal({ level, onClose }: LevelUpModalProps) {
       particleCount: 120,
       spread: 80,
       origin: { y: 0.5 },
-      colors: ["#58CC02","#1CB0F6","#9B5DE5","#FFD900","#FF9600"],
+      colors: ["#58CC02","var(--color-brand-primary)","#9B5DE5","#FFD900","#FF9600"],
     });
   }, []);
 

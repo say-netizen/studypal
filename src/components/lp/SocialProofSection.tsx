@@ -13,7 +13,7 @@ const REVIEWS = [
     name: "みかこさん（保護者）",
     role: "中学1年生のお母さん",
     initial: "み",
-    bg: "linear-gradient(135deg,#9B5DE5,#1CB0F6)",
+    bg: "linear-gradient(135deg,#9B5DE5,var(--color-brand-primary))",
   },
   {
     text: "「部活が忙しくてもAIが隙間時間を見つけてくれる。テスト1週間前から自動で計画を立て直してくれて助かった！」",

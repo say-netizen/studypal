@@ -123,7 +123,7 @@ export function OnboardingChecklist({ hasTests }: { hasTests: boolean }) {
       <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "var(--color-bg-tertiary)" }}>
         <div
           className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${pct}%`, background: "linear-gradient(90deg, #1CB0F6, #9B5DE5)" }}
+          style={{ width: `${pct}%`, background: "linear-gradient(90deg, var(--color-brand-primary), #9B5DE5)" }}
         />
       </div>
 

@@ -179,7 +179,7 @@ export default function RankingPage() {
                 <div className="relative">
                   <div
                     className="rounded-full p-0.5"
-                    style={{ background: "linear-gradient(135deg, #58CC02, #1CB0F6)" }}
+                    style={{ background: "linear-gradient(135deg, #58CC02, var(--color-brand-primary))" }}
                   >
                     <div
                       className="rounded-full p-0.5"

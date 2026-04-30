@@ -101,9 +101,9 @@ function AiScreen() {
       </div>
       <div style={{ background: "rgba(255,255,255,.07)", borderRadius: "var(--radius-lg)", borderBottomLeftRadius: "4px", padding: "10px 14px", fontSize: "0.8125rem", lineHeight: 1.5, color: "#D0D8E4" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-          <div style={{ width: "20px", height: "20px", background: "linear-gradient(135deg,#1CB0F6,#9B5DE5)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: "#fff", fontWeight: 700 }}>AI</div>
+          <div style={{ width: "20px", height: "20px", background: "linear-gradient(135deg,var(--color-brand-primary),#9B5DE5)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: "#fff", fontWeight: 700 }}>AI</div>
           <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: "var(--color-brand-blue)" }}>StudyPal AI</span>
-          <span style={{ background: "linear-gradient(135deg,#9B5DE5,#1CB0F6)", color: "#fff", fontSize: "0.625rem", fontWeight: 700, padding: "1px 6px", borderRadius: "9999px" }}>✨ 生成完了</span>
+          <span style={{ background: "linear-gradient(135deg,#9B5DE5,var(--color-brand-primary))", color: "#fff", fontSize: "0.625rem", fontWeight: 700, padding: "1px 6px", borderRadius: "9999px" }}>✨ 生成完了</span>
         </div>
         <strong>10問の予想問題を生成しました！</strong><br />四択 3問 · 穴埋め 4問 · 記述 3問
       </div>

@@ -20,7 +20,7 @@ const COUNTDOWN_PRESETS = [15, 30, 45, 60, 90];
 
 const SUBJECT_COLORS: Record<string, string> = {
   国語: "#9B5DE5",
-  数学: "#1CB0F6",
+  数学: "var(--color-brand-primary)",
   英語: "#58CC02",
   理科: "#00C9A7",
   社会: "#FF9600",
@@ -274,7 +274,7 @@ export default function StudyPage() {
                     width: `${Math.min((result.actual / result.planned) * 100, 100)}%`,
                     background: result.actual >= result.planned
                       ? "linear-gradient(90deg, #58CC02, #89E219)"
-                      : "linear-gradient(90deg, #1CB0F6, #00C9A7)",
+                      : "linear-gradient(90deg, var(--color-brand-primary), #00C9A7)",
                     transition: "width 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
                   }}
                 />

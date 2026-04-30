@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 
 const SUBJECT_COLORS: Record<string, string> = {
-  国語: "#9B5DE5", 数学: "#1CB0F6", 英語: "#58CC02", 理科: "#00C9A7", 社会: "#FF9600",
+  国語: "#9B5DE5", 数学: "var(--color-brand-primary)", 英語: "#58CC02", 理科: "#00C9A7", 社会: "#FF9600",
 };
 
 export default function TestScorePage() {

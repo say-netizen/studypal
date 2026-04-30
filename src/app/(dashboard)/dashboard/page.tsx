@@ -70,7 +70,7 @@ function XpLevelBar({ totalXp, grade }: { totalXp: number; grade?: string | null
     level <= 30 ? "#A8A9AD" :
     level <= 50 ? "#FFD700" :
     level <= 70 ? "#00C9A7" :
-    level <= 85 ? "#1CB0F6" : "#9B5DE5";
+    level <= 85 ? "var(--color-brand-primary)" : "#9B5DE5";
   const tierLabel =
     level <= 15 ? "Bronze" : level <= 30 ? "Silver" : level <= 50 ? "Gold" :
     level <= 70 ? "Platinum" : level <= 85 ? "Diamond" : "Master";
