@@ -32,7 +32,7 @@ export function ProblemSection() {
   return (
     <section
       id="problem"
-      style={{ padding: "96px 24px", background: "#FFF9F5" }}
+      style={{ padding: "clamp(64px,8vw,96px) clamp(16px,4vw,24px)", background: "#FFF9F5" }}
     >
       <div style={{ maxWidth: "1280px", margin: "0 auto", textAlign: "center" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "0.8125rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-brand-blue)", marginBottom: "16px" }}>

@@ -29,7 +29,7 @@ export function FaqSection() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   return (
-    <section id="faq" style={{ padding: "96px 24px", background: "#0A1628" }}>
+    <section id="faq" style={{ padding: "clamp(64px,8vw,96px) clamp(16px,4vw,24px)", background: "#0A1628" }}>
       <div style={{ maxWidth: "1280px", margin: "0 auto", textAlign: "center" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "0.8125rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-brand-blue)", marginBottom: "16px" }}>
           よくある質問
@@ -46,7 +46,7 @@ export function FaqSection() {
                 key={idx}
                 style={{
                   background: "rgba(255,255,255,.04)",
-                  border: `1px solid ${isOpen ? "rgba(28,176,246,.35)" : "rgba(255,255,255,.08)"}`,
+                  border: `1px solid ${isOpen ? "rgba(160,82,45,.5)" : "rgba(255,255,255,.08)"}`,
                   borderRadius: "var(--radius-xl)",
                   overflow: "hidden",
                   transition: "border-color 200ms",
@@ -73,7 +73,7 @@ export function FaqSection() {
                     width: "28px",
                     height: "28px",
                     borderRadius: "50%",
-                    background: isOpen ? "rgba(28,176,246,.2)" : "rgba(255,255,255,.08)",
+                    background: isOpen ? "rgba(160,82,45,.2)" : "rgba(255,255,255,.08)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -81,11 +81,11 @@ export function FaqSection() {
                     transition: "background 200ms, transform 200ms",
                     transform: isOpen ? "rotate(45deg)" : "none",
                     fontSize: "1.125rem",
-                    color: isOpen ? "var(--color-brand-blue)" : "rgba(255,255,255,.5)",
+                    color: isOpen ? "var(--color-brand-primary)" : "rgba(255,255,255,.5)",
                     fontWeight: 300,
                   }}>+</span>
                 </button>
-                <div style={{ maxHeight: isOpen ? "300px" : 0, overflow: "hidden", transition: "max-height 350ms cubic-bezier(0,0,.2,1)" }}>
+                <div style={{ maxHeight: isOpen ? "600px" : 0, overflow: "hidden", transition: "max-height 350ms cubic-bezier(0,0,.2,1)" }}>
                   <div style={{ padding: "0 24px 20px", fontSize: "0.9375rem", color: "#A0A0A8", lineHeight: 1.75, borderTop: "1px solid rgba(255,255,255,.06)" }}>
                     {a}
                   </div>
