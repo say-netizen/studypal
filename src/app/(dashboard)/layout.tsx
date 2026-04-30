@@ -123,9 +123,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen flex" style={{ background: "var(--color-bg-secondary)" }}>
-      {/* ─── サイドバー（デスクトップ） ─── */}
+      {/* ─── サイドバー（デスクトップ 1024px以上） ─── */}
       <aside
-        className="hidden md:flex flex-col w-60 shrink-0 fixed top-0 left-0 h-screen z-40"
+        className="hidden lg:flex flex-col w-60 shrink-0 fixed top-0 left-0 h-screen z-40"
         style={{
           background: "var(--color-bg-primary)",
           borderRight: "1px solid var(--color-bg-tertiary)",
@@ -220,13 +220,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* ─── メインコンテンツ ─── */}
-      <div className="flex-1 md:ml-60 flex flex-col min-h-screen pb-16 md:pb-0">
+      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen pb-14 lg:pb-0">
         <main className="flex-1">{children}</main>
       </div>
 
-      {/* ─── ボトムナビ（モバイル） ─── */}
+      {/* ─── ボトムナビ（タブレット以下 1023px以下） ─── */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around px-2 h-16"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around px-2 h-14"
         style={{
           background: "var(--color-bg-primary)",
           borderTop: "1px solid var(--color-bg-tertiary)",

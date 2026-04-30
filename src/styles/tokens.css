@@ -44,6 +44,8 @@
   /* Typography */
   --font-display: 'Nunito', sans-serif;
   --font-body:    'Inter', sans-serif;
+  --font-inter:   'Inter', sans-serif; /* alias for globals.css */
+  --font-nunito:  'Nunito', sans-serif;
   --font-jp:      'M PLUS Rounded 1c', sans-serif;
 
   /* Spacing */

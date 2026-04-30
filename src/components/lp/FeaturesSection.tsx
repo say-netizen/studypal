@@ -30,7 +30,7 @@ const FEATURES = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" style={{ padding: "96px 24px", background: "#0A1628", color: "#F2F2F2" }}>
+    <section id="features" style={{ padding: "clamp(64px,8vw,96px) clamp(16px,4vw,24px)", background: "#0A1628", color: "#F2F2F2" }}>
       <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: "64px" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "0.8125rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-brand-blue)", marginBottom: "16px" }}>
@@ -41,14 +41,14 @@ export function FeaturesSection() {
           </h2>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "80px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "clamp(48px,7vw,80px)" }}>
           {FEATURES.map(({ num, tag, title, desc, points, screen, rev }) => (
             <div
               key={num}
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                gap: "48px",
+                gap: "clamp(24px,4vw,48px)",
                 alignItems: "center",
                 direction: rev ? "rtl" : "ltr",
               }}
@@ -86,7 +86,8 @@ export function FeaturesSection() {
       </div>
 
       <style>{`
-        @media(max-width:1024px){ .feature-row-responsive{grid-template-columns:1fr!important;direction:ltr!important} }
+        @media(max-width:1024px){ .feature-row-responsive{grid-template-columns:1fr!important;direction:ltr!important;gap:32px!important} }
+        @media(max-width:640px){ .feature-row-responsive{gap:24px!important} }
       `}</style>
     </section>
   );

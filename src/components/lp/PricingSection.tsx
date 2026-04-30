@@ -139,7 +139,9 @@ export function PricingSection() {
       </div>
 
       <style>{`
-        @media(max-width:1024px){ .pricing-grid-responsive{grid-template-columns:1fr!important;max-width:400px!important} .pricing-grid-responsive > div[style*="scale(1.04)"]{transform:scale(1)!important} }
+        @media(max-width:1024px) and (min-width:641px){ .pricing-grid-responsive{grid-template-columns:repeat(2,1fr)!important;max-width:680px!important} }
+        @media(max-width:640px){ .pricing-grid-responsive{grid-template-columns:1fr!important;max-width:420px!important} }
+        .pricing-grid-responsive > div{transform:none!important}
       `}</style>
     </section>
   );

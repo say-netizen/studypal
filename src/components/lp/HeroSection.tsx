@@ -23,7 +23,7 @@ export function HeroSection() {
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "linear-gradient(rgba(28,176,246,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(28,176,246,.035) 1px,transparent 1px)",
+            "linear-gradient(rgba(160,82,45,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(160,82,45,.04) 1px,transparent 1px)",
           backgroundSize: "48px 48px",
           pointerEvents: "none",
         }}
@@ -342,8 +342,9 @@ export function HeroSection() {
         @keyframes float { 0%,100%{transform:translate(-50%,-50%)} 50%{transform:translate(-50%,calc(-50% - 8px))} }
         @keyframes slideInRight { from{opacity:0;transform:translateX(32px)} to{opacity:1;transform:translateX(0)} }
         @keyframes slideInLeft { from{opacity:0;transform:translateX(-32px)} to{opacity:1;transform:translateX(0)} }
-        @media(max-width:1024px){ .hero-grid{grid-template-columns:1fr!important;text-align:center} .hero-visuals-container{max-width:480px;margin:0 auto;height:380px!important} }
-        @media(max-width:480px){ .hidden-xs{display:none!important} .hero-visuals-container{height:280px!important} }
+        @media(max-width:1024px){ .hero-grid{grid-template-columns:1fr!important;text-align:center} .hero-visuals-container{max-width:440px;margin:0 auto;height:360px!important} }
+        @media(max-width:768px){ .hidden-xs{display:none!important} .hero-visuals-container{height:300px!important} }
+        @media(max-width:480px){ .hero-visuals-container{height:260px!important;max-width:320px} }
       `}</style>
     </section>
   );
