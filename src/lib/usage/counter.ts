@@ -34,6 +34,21 @@ export async function incrementUsage(uid: string): Promise<void> {
 export type PlanType = "free" | "pro" | "family";
 const FREE_LIMIT = 3;
 
+/** Family子アカウントが親のplanを継承する実効プランを返す */
+export async function resolveEffectivePlan(uid: string): Promise<PlanType> {
+  const userSnap = await adminDb.collection("users").doc(uid).get();
+  const userData = userSnap.data();
+  let plan = (userData?.plan ?? "free") as PlanType;
+  if (plan === "free") {
+    const parentUid = userData?.parentUid as string | null;
+    if (parentUid) {
+      const parentSnap = await adminDb.collection("users").doc(parentUid).get();
+      if (parentSnap.data()?.plan === "family") plan = "family";
+    }
+  }
+  return plan;
+}
+
 /** プランと使用回数に基づいて生成可能かチェック */
 export async function checkLimit(
   uid: string,

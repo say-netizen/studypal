@@ -38,6 +38,9 @@ export const metadata: Metadata = {
     description: "毎日続けたくなるAI学習体験",
     type: "website",
   },
+  verification: {
+    google: 'TS3Z6BEimIbsiMXsDWb54JzJZ4E5z7TvAHOi7XfgwAA',
+  },
 };
 
 export default function RootLayout({

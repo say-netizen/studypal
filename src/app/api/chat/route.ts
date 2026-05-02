@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { resolveEffectivePlan } from "@/lib/usage/counter";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -20,8 +21,8 @@ export async function POST(req: NextRequest) {
   }
 
   const userSnap = await adminDb.collection("users").doc(uid).get();
-  const plan = userSnap.data()?.plan ?? "free";
   const grade = (userSnap.data()?.grade as string | null) ?? "中2";
+  const plan = await resolveEffectivePlan(uid);
   if (plan === "free") {
     return NextResponse.json(
       { error: "AI塾講師はProプランの機能です", upgradeRequired: true },

@@ -9,6 +9,7 @@ import {
   getScheduleRange,
   getStudySessionRange,
   deleteSchedule,
+  createSchedule,
   type ScheduleDoc,
   type StudySessionDoc,
 } from "@/lib/firebase/schema";
@@ -24,7 +25,7 @@ import {
   getDay,
 } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Plus, ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Trash2, X, Sparkles } from "lucide-react";
 
 type EventType = ScheduleDoc["type"];
 
@@ -242,6 +243,201 @@ function NowLine() {
   );
 }
 
+type AiPlanItem = { date: string; focus: string; minutes: number };
+type AiResult = { dailyMinutes: number; plan: AiPlanItem[]; advice: string };
+
+// ── AI逆算計画モーダル ─────────────────────
+function AiPlanModal({
+  onClose,
+  schedules,
+  uid,
+  token,
+  onSaved,
+}: {
+  onClose: () => void;
+  schedules: (ScheduleDoc & { id: string })[];
+  uid: string;
+  token: string;
+  onSaved: () => void;
+}) {
+  const [testDate, setTestDate] = useState("");
+  const [subject, setSubject] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<AiResult | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function generate() {
+    if (!testDate || !subject) { setError("テスト日と科目を入力してください"); return; }
+    setError("");
+    setLoading(true);
+    try {
+      const today = new Date();
+      const test = new Date(testDate);
+      const daysUntilTest = Math.max(1, Math.ceil((test.getTime() - today.getTime()) / 86400000));
+
+      // 部活スケジュールを空き時間情報としてAPIへ渡す
+      const freeSlots = schedules
+        .filter((s) => s.type === "club" || s.type === "event")
+        .filter((s) => s.date >= format(today, "yyyy-MM-dd") && s.date <= testDate)
+        .map((s) => ({ date: s.date, title: s.title, startTime: s.startTime, duration: s.duration }));
+
+      const res = await fetch("/api/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ testDate, subject, daysUntilTest, freeSlots }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "生成に失敗しました"); return; }
+      setResult(data);
+    } catch {
+      setError("通信エラーが発生しました");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function saveAll() {
+    if (!result) return;
+    setSaving(true);
+    try {
+      await Promise.all(
+        result.plan.map((item) =>
+          createSchedule({
+            userId: uid,
+            date: item.date,
+            title: `[AI] ${item.focus}`,
+            subject,
+            type: "study",
+            duration: item.minutes,
+            startTime: null,
+          })
+        )
+      );
+      onSaved();
+      onClose();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.6)" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl overflow-hidden flex flex-col"
+        style={{ background: "var(--color-bg-primary)", boxShadow: "var(--shadow-card-hover)", maxHeight: "90vh" }}
+      >
+        {/* ヘッダー */}
+        <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--color-bg-tertiary)" }}>
+          <div className="flex items-center gap-2">
+            <Sparkles size={18} style={{ color: "var(--color-brand-primary)" }} />
+            <h2 className="font-display font-bold text-base" style={{ color: "var(--color-text-primary)" }}>AI逆算計画を生成</h2>
+          </div>
+          <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center hover:opacity-70" style={{ background: "var(--color-bg-tertiary)" }}>
+            <X size={14} style={{ color: "var(--color-text-muted)" }} />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto flex-1 p-5 space-y-4">
+          {!result ? (
+            <>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: "var(--color-text-secondary)" }}>テスト日</label>
+                  <input
+                    type="date"
+                    value={testDate}
+                    onChange={(e) => setTestDate(e.target.value)}
+                    min={format(new Date(), "yyyy-MM-dd")}
+                    className="w-full rounded-xl px-3 py-2.5 text-sm border outline-none"
+                    style={{ borderColor: "var(--color-bg-tertiary)", color: "var(--color-text-primary)", background: "var(--color-bg-secondary)" }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: "var(--color-text-secondary)" }}>科目</label>
+                  <input
+                    type="text"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    placeholder="例: 数学、英語、理科"
+                    className="w-full rounded-xl px-3 py-2.5 text-sm border outline-none"
+                    style={{ borderColor: "var(--color-bg-tertiary)", color: "var(--color-text-primary)", background: "var(--color-bg-secondary)" }}
+                  />
+                </div>
+              </div>
+              {error && <p className="text-xs font-semibold" style={{ color: "var(--color-error)" }}>{error}</p>}
+              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                カレンダーの部活・予定を読み取り、空き時間に勉強計画を自動配置します。
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="rounded-xl p-3" style={{ background: "var(--color-brand-primary)" + "15", border: "1px solid " + "var(--color-brand-primary)" + "30" }}>
+                <p className="text-xs font-bold mb-1" style={{ color: "var(--color-brand-primary)" }}>AIアドバイス</p>
+                <p className="text-sm" style={{ color: "var(--color-text-primary)" }}>{result.advice}</p>
+              </div>
+              <p className="text-xs font-semibold" style={{ color: "var(--color-text-secondary)" }}>
+                1日の推奨学習時間: {result.dailyMinutes}分 · {result.plan.length}日分の計画
+              </p>
+              <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                {result.plan.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: "var(--color-bg-secondary)" }}>
+                    <div>
+                      <p className="text-xs font-bold" style={{ color: "var(--color-text-primary)" }}>{item.date}</p>
+                      <p className="text-[11px]" style={{ color: "var(--color-text-secondary)" }}>{item.focus}</p>
+                    </div>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-pill" style={{ background: "#58CC0220", color: "#58CC02" }}>{item.minutes}分</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* フッター */}
+        <div className="px-5 py-4 border-t flex gap-2" style={{ borderColor: "var(--color-bg-tertiary)" }}>
+          {!result ? (
+            <button
+              onClick={generate}
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-pill text-sm font-bold text-white transition-all"
+              style={{ background: loading ? "var(--color-bg-tertiary)" : "var(--color-brand-primary)", color: loading ? "var(--color-text-muted)" : "#fff" }}
+            >
+              {loading ? (
+                <><div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--color-text-muted)" }} />生成中…</>
+              ) : (
+                <><Sparkles size={14} />計画を生成</>
+              )}
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setResult(null)}
+                className="px-4 py-2.5 rounded-pill text-sm font-bold border transition-all"
+                style={{ borderColor: "var(--color-bg-tertiary)", color: "var(--color-text-secondary)" }}
+              >
+                やり直す
+              </button>
+              <button
+                onClick={saveAll}
+                disabled={saving}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-pill text-sm font-bold text-white"
+                style={{ background: saving ? "var(--color-bg-tertiary)" : "#58CC02", color: saving ? "var(--color-text-muted)" : "#fff" }}
+              >
+                {saving ? "保存中…" : `${result.plan.length}件をカレンダーに追加`}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── メインページ ──────────────────────────
 export default function CalendarPage() {
   const { currentUser } = useAuth();
@@ -250,6 +446,8 @@ export default function CalendarPage() {
   const [sessions, setSessions] = useState<(StudySessionDoc & { id: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [userToken, setUserToken] = useState("");
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -272,6 +470,11 @@ export default function CalendarPage() {
   }
 
   useEffect(() => { loadData(); /* eslint-disable-next-line */ }, [currentUser, currentMonth]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    currentUser.getIdToken().then(setUserToken).catch(() => {});
+  }, [currentUser]);
 
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const startPad = getDay(monthStart);
@@ -317,18 +520,28 @@ export default function CalendarPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       {/* ヘッダー */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <h1 className="text-2xl font-display font-black" style={{ color: "var(--color-text-primary)" }}>
           カレンダー
         </h1>
-        <Link
-          href="/calendar/new"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-pill text-sm font-bold text-white transition-all hover:-translate-y-0.5"
-          style={{ background: "var(--color-brand-blue)", boxShadow: "0 4px 12px rgba(28,176,246,0.4)" }}
-        >
-          <Plus size={16} />
-          予定を追加
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAiModal(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-pill text-sm font-bold transition-all hover:-translate-y-0.5"
+            style={{ background: "var(--color-brand-primary)" + "18", color: "var(--color-brand-primary)", border: "1px solid " + "var(--color-brand-primary)" + "40" }}
+          >
+            <Sparkles size={14} />
+            AI計画
+          </button>
+          <Link
+            href="/calendar/new"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-pill text-sm font-bold text-white transition-all hover:-translate-y-0.5"
+            style={{ background: "var(--color-brand-primary)", boxShadow: "var(--shadow-btn-brown)" }}
+          >
+            <Plus size={16} />
+            予定を追加
+          </Link>
+        </div>
       </div>
 
       {/* カレンダーグリッド */}
@@ -453,6 +666,17 @@ export default function CalendarPage() {
           sessions={selectedSessions}
           onDelete={async (id) => { await handleDelete(id); }}
           onClose={() => setSelectedDay(null)}
+        />
+      )}
+
+      {/* AI逆算計画モーダル */}
+      {showAiModal && currentUser && (
+        <AiPlanModal
+          onClose={() => setShowAiModal(false)}
+          schedules={schedules}
+          uid={currentUser.uid}
+          token={userToken}
+          onSaved={loadData}
         />
       )}
     </div>

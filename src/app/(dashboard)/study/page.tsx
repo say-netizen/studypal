@@ -141,9 +141,7 @@ export default function StudyPage() {
     setPhase("done");
 
     const finalElapsed = savedElapsedRef.current + (startTimeRef.current > 0 ? Math.floor((Date.now() - startTimeRef.current) / 1000) : 0);
-    const actualMinutes = timerMode === "countdown"
-      ? countdownMinutes
-      : Math.max(1, Math.round(finalElapsed / 60));
+    const actualMinutes = Math.max(1, Math.round(finalElapsed / 60));
     const plannedMinutes = timerMode === "countdown"
       ? countdownMinutes
       : (selectedSchedule?.duration ?? 0);

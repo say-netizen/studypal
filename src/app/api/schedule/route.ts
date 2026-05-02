@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { resolveEffectivePlan } from "@/lib/usage/counter";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -50,9 +51,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "無効なトークンです" }, { status: 401 });
   }
 
-  // プラン確認 (Pro/Family のみ)
-  const userSnap = await adminDb.collection("users").doc(uid).get();
-  const plan = userSnap.data()?.plan ?? "free";
+  // プラン確認 (Pro/Family のみ、子アカウントは親planを継承)
+  const plan = await resolveEffectivePlan(uid);
   if (plan === "free") {
     return NextResponse.json(
       { error: "この機能はProプランで利用できます", upgradeRequired: true },
